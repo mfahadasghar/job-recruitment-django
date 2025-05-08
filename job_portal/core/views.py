@@ -1,6 +1,8 @@
 from django.shortcuts import render, redirect
-from .forms import UserRegisterForm
+from .forms import UserRegisterForm,UserLoginForm
 from django.http import HttpResponse
+from django.contrib.auth.views import LoginView
+from django.contrib.auth.decorators import login_required
 
 def register(request):
     if request.method == 'POST':
@@ -15,3 +17,12 @@ def register(request):
 
 def home(request):
     return HttpResponse("Welcome to Job Portal!")
+
+class CustomLoginView(LoginView):
+    template_name = 'core/login.html'
+    authentication_form = UserLoginForm
+    
+
+@login_required
+def dashboard(request):
+    return render(request, 'core/dashboard.html')

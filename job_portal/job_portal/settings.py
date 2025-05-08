@@ -27,6 +27,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+AUTH_USER_MODEL = 'core.User'
 
 # Application definition
 
@@ -39,9 +40,6 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     'core',
 ]
-
-AUTH_USER_MODEL = 'core.User'
-
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",

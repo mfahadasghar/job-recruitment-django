@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% block title %}Employer Dashboard{% endblock %}
+{% block content %}
+<div class="card shadow p-4">
+  <h4>Your Job Postings</h4>
+  <ul class="list-group mt-3">
+    {% for item in job_data %}
+      <li class="list-group-item">
+        <strong>{{ item.job.title }}</strong> – {{ item.job.location }}<br>
+        Posted on: {{ item.job.created_at|date:"M d, Y" }}<br>
+        Applicants: {{ item.applicant_count }} |
+        <a href="{% url 'view-applicants' item.job.id %}" class="btn btn-sm btn-info mt-2">View Applicants</a>
+      </li>
+    {% empty %}
+      <li class="list-group-item">You haven't posted any jobs yet.</li>
+    {% endfor %}
+  </ul>
+</div>
+{% endblock %}

@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% block title %}Apply to {{ job.title }}{% endblock %}
+{% block content %}
+<div class="card shadow p-4">
+  <h4>Apply to {{ job.title }}</h4>
+  <form method="POST">
+    {% csrf_token %}
+    <div class="mb-3">
+      <label>Cover Letter</label>
+      <textarea name="cover_letter" rows="5" class="form-control"></textarea>
+    </div>
+    <button class="btn btn-success">Submit Application</button>
+    <a href="{% url 'job-list' %}" class="btn btn-secondary">Back</a>
+  </form>
+</div>
+{% endblock %}

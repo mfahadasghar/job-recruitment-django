@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% block title %}Applicants for {{ job.title }}{% endblock %}
+{% block content %}
+<div class="card shadow p-4">
+  <h4>Applicants for: {{ job.title }}</h4>
+  <ul class="list-group mt-3">
+    {% for app in applications %}
+      <li class="list-group-item">
+        <strong>{{ app.seeker.user.username }}</strong><br>
+        Applied on: {{ app.applied_at|date:"M d, Y H:i" }}<br>
+        <form method="POST" action="{% url 'update-applicant-status' app.id %}">
+            {% csrf_token %}
+            <div class="input-group mt-2">
+              <select name="status" class="form-select">
+                <option value="applied" {% if app.status == 'applied' %}selected{% endif %}>Applied</option>
+                <option value="interview" {% if app.status == 'interview' %}selected{% endif %}>Interview</option>
+                <option value="rejected" {% if app.status == 'rejected' %}selected{% endif %}>Rejected</option>
+                <option value="hired" {% if app.status == 'hired' %}selected{% endif %}>Hired</option>
+              </select>
+              <button class="btn btn-outline-success" type="submit">Update</button>
+            </div>
+          </form>
+          <br>
+        <a href="{{ app.resume.url }}" target="_blank" class="btn btn-sm btn-outline-primary">View Resume</a>
+        {% if app.cover_letter %}
+          <p class="mt-2"><strong>Cover Letter:</strong> {{ app.cover_letter|truncatewords:40 }}</p>
+        {% endif %}
+      </li>
+    {% empty %}
+      <li class="list-group-item">No applications yet for this job.</li>
+    {% endfor %}
+  </ul>
+</div>
+{% endblock %}

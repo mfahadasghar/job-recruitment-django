@@ -10,13 +10,21 @@ class User(AbstractUser):
     role = models.CharField(max_length=10, choices=ROLE_CHOICES)
     is_email_verified = models.BooleanField(default=False)
 
+class Skill(models.Model):
+    name = models.CharField(max_length=50, unique=True)
+
+    def __str__(self):
+        return self.name
+
+
 class JobSeekerProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     phone = models.CharField(max_length=20)
     location = models.CharField(max_length=100)
     resume = models.FileField(upload_to='resumes/')
     bio = models.TextField(blank=True)
-
+    skills = models.ManyToManyField(Skill, blank=True)  # ✅ Changed from TextField
+    
 class Education(models.Model):
     seeker = models.ForeignKey(JobSeekerProfile, on_delete=models.CASCADE)
     institute = models.CharField(max_length=100)

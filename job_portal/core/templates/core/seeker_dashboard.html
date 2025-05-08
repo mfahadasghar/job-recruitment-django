@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<div class="row">
+  <div class="col-md-6">
+    <div class="card p-3 shadow mb-4">
+      <h5>🔍 Recommended Jobs</h5>
+      <ul class="list-group mt-2">
+        {% for job, score in recommended_jobs %}
+        <li class="list-group-item">
+          <strong>{{ job.title }}</strong> — {{ job.location }}<br>
+          Match Score: <span class="text-success fw-bold">{{ score }}%</span><br>
+      
+          {% if job.id in applied_ids %}
+            <span class="badge bg-secondary">Already Applied</span>
+          {% else %}
+            <a href="{% url 'apply-job' job.id %}" class="btn btn-sm btn-primary mt-2">Apply</a>
+          {% endif %}
+        </li>
+        {% empty %}
+          <li class="list-group-item">No recommended jobs found.</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+
+  <div class="col-md-6">
+    <div class="card p-3 shadow mb-4">
+      <h5>🆕 Most Recent Jobs</h5>
+      <ul class="list-group mt-2">
+        {% for job in all_jobs %}
+        <li class="list-group-item">
+          <strong>{{ job.title }}</strong> — {{ job.location }}<br>
+          {% if job.id in applied_ids %}
+            <span class="badge bg-secondary">Already Applied</span>
+          {% else %}
+            <a href="{% url 'apply-job' job.id %}" class="btn btn-sm btn-outline-primary mt-2">Apply</a>
+          {% endif %}
+        </li>
+        {% empty %}
+          <li class="list-group-item">No jobs posted yet.</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,12 +1,98 @@
 {% extends 'base.html' %}
-{% block title %}Update Profile{% endblock %}
+{% block title %}My Profile{% endblock %}
 {% block content %}
-<div class="card shadow p-4">
-  <h4>Update Your Profile</h4>
+<div class="card shadow p-4 mb-4">
+  <h4>Update Profile</h4>
   <form method="POST" enctype="multipart/form-data">
     {% csrf_token %}
     {{ form.as_p }}
-    <button class="btn btn-primary mt-3">Save</button>
+    <button class="btn btn-primary mt-2">Save</button>
   </form>
+</div>
+
+<!-- Experience -->
+<div class="card shadow p-3 mb-4">
+  <h5>Experience</h5>
+  <a href="{% url 'add-experience' %}" class="btn btn-sm btn-outline-primary mb-2">+ Add Experience</a>
+  <ul class="list-group">
+    {% for exp in experiences %}
+     {% for exp in experiences %}
+  <li class="list-group-item">
+    <strong>{{ exp.position }}</strong> at {{ exp.company }}<br>
+    {{ exp.start_date }} to {{ exp.end_date|default:"Present" }}
+    <div class="mt-2">
+      <a href="{% url 'edit-experience' exp.id %}" class="btn btn-sm btn-outline-secondary">Edit</a>
+      <a href="{% url 'delete-experience' exp.id %}" class="btn btn-sm btn-outline-danger">Delete</a>
+    </div>
+  </li>
+{% endfor %}
+    {% empty %}
+      <li class="list-group-item">No experience added.</li>
+    {% endfor %}
+  </ul>
+</div>
+
+<!-- Education -->
+<div class="card shadow p-3 mb-4">
+  <h5>Education</h5>
+  <a href="{% url 'add-education' %}" class="btn btn-sm btn-outline-primary mb-2">+ Add Education</a>
+  <ul class="list-group">
+    {% for edu in educations %}
+      {% for edu in educations %}
+  <li class="list-group-item">
+    {{ edu.degree }} at {{ edu.institute }} ({{ edu.start_year }} - {{ edu.end_year }})
+    <div class="mt-2">
+      <a href="{% url 'edit-education' edu.id %}" class="btn btn-sm btn-outline-secondary">Edit</a>
+      <a href="{% url 'delete-education' edu.id %}" class="btn btn-sm btn-outline-danger">Delete</a>
+    </div>
+  </li>
+{% endfor %}
+    {% empty %}
+      <li class="list-group-item">No education added.</li>
+    {% endfor %}
+  </ul>
+</div>
+
+<!-- Certifications -->
+<div class="card shadow p-3 mb-4">
+  <h5>Certifications</h5>
+  <a href="{% url 'add-certification' %}" class="btn btn-sm btn-outline-primary mb-2">+ Add Certification</a>
+  <ul class="list-group">
+    {% for cert in certifications %}
+      {% for cert in certifications %}
+  <li class="list-group-item">
+    {{ cert.name }} by {{ cert.issuer }} ({{ cert.issue_date }})
+    <div class="mt-2">
+      <a href="{% url 'edit-certification' cert.id %}" class="btn btn-sm btn-outline-secondary">Edit</a>
+      <a href="{% url 'delete-certification' cert.id %}" class="btn btn-sm btn-outline-danger">Delete</a>
+    </div>
+  </li>
+{% endfor %}
+    {% empty %}
+      <li class="list-group-item">No certifications added.</li>
+    {% endfor %}
+  </ul>
+</div>
+
+<!-- Portfolio -->
+<div class="card shadow p-3 mb-4">
+  <h5>Portfolio</h5>
+  <a href="{% url 'add-portfolio' %}" class="btn btn-sm btn-outline-primary mb-2">+ Add Project</a>
+  <ul class="list-group">
+    {% for item in portfolios %}
+      {% for item in portfolios %}
+  <li class="list-group-item">
+    <strong>{{ item.project_title }}</strong><br>
+    <a href="{{ item.url }}" target="_blank">{{ item.url }}</a>
+    <div class="mt-2">
+      <a href="{% url 'edit-portfolio' item.id %}" class="btn btn-sm btn-outline-secondary">Edit</a>
+      <a href="{% url 'delete-portfolio' item.id %}" class="btn btn-sm btn-outline-danger">Delete</a>
+    </div>
+  </li>
+{% endfor %}
+    {% empty %}
+      <li class="list-group-item">No portfolio projects added.</li>
+    {% endfor %}
+  </ul>
 </div>
 {% endblock %}

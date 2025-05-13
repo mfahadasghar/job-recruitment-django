@@ -50,16 +50,22 @@ def seeker_profile(request):
         messages.error(request, "Access denied.")
         return redirect('dashboard')
 
-    profile, created = JobSeekerProfile.objects.get_or_create(user=request.user)
-    if request.method == 'POST':
-        form = JobSeekerProfileForm(request.POST, request.FILES, instance=profile)
-        if form.is_valid():
-            form.save()
-            messages.success(request, "Profile updated.")
-            return redirect('seeker-profile')
-    else:
-        form = JobSeekerProfileForm(instance=profile)
-    return render(request, 'core/seeker_profile.html', {'form': form})
+    seeker, created = JobSeekerProfile.objects.get_or_create(user=request.user)
+
+    form = JobSeekerProfileForm(request.POST or None, request.FILES or None, instance=seeker)
+    if request.method == 'POST' and form.is_valid():
+        form.save()
+        messages.success(request, "Profile updated.")
+        return redirect('seeker-profile')
+
+    context = {
+        'form': form,
+        'experiences': Experience.objects.filter(seeker=seeker),
+        'educations': Education.objects.filter(seeker=seeker),
+        'certifications': Certification.objects.filter(seeker=seeker),
+        'portfolios': Portfolio.objects.filter(seeker=seeker),
+    }
+    return render(request, 'core/seeker_profile.html', context)
 
 
 @login_required
@@ -137,24 +143,26 @@ def delete_job(request, job_id):
 
 @login_required
 def job_list(request):
-    if request.user.role != 'seeker':
-        messages.error(request, "Access denied.")
-        return redirect('dashboard')
-
-    query = request.GET.get('q')
     jobs = Job.objects.filter(is_active=True).order_by('-created_at')
-
+    query = request.GET.get('q')
     if query:
-        jobs = jobs.filter(
-            Q(title__icontains=query) |
-            Q(location__icontains=query) |
-            Q(skills_required__icontains=query)
-        )
+        jobs = jobs.filter(title__icontains=query)
 
-    applied_ids = Application.objects.filter(seeker=request.user.jobseekerprofile).values_list('job_id', flat=True)
+    applied_ids = set()
+    saved_job_ids = set()
+
+    if request.user.role == 'seeker':
+        seeker = request.user.jobseekerprofile
+        applied_ids = set(Application.objects.filter(seeker=seeker).values_list('job_id', flat=True))
+        saved_job_ids = set(SavedJob.objects.filter(seeker=seeker).values_list('job_id', flat=True))
+
+    return render(request, 'core/job_list.html', {
+        'jobs': jobs,
+        'applied_ids': applied_ids,
+        'saved_job_ids': saved_job_ids,
+        'query': query,
+    })
     
-    return render(request, 'core/job_list.html', {'jobs': jobs,'query': query,'applied_ids': applied_ids})
-
 @login_required
 def apply_job(request, job_id):
     if request.user.role != 'seeker':
@@ -185,17 +193,17 @@ def apply_job(request, job_id):
 @login_required
 def seeker_dashboard(request):
     if request.user.role != 'seeker':
-        messages.error(request, "Access denied.")
         return redirect('dashboard')
 
     seeker = request.user.jobseekerprofile
     seeker_skills = set(seeker.skills.values_list('name', flat=True))
     jobs = Job.objects.filter(is_active=True).order_by('-created_at')
 
-    # Get applied job IDs
     applied_ids = set(Application.objects.filter(seeker=seeker).values_list('job_id', flat=True))
+    saved_jobs = SavedJob.objects.filter(seeker=seeker).select_related('job')
+    saved_job_ids = set(saved_jobs.values_list('job__id', flat=True))  # ✅ prepare for template
 
-    # Recommended jobs with match score
+    # Build recommended
     recommended = []
     for job in jobs:
         job_skills = set(map(str.strip, job.skills_required.lower().split(',')))
@@ -204,12 +212,13 @@ def seeker_dashboard(request):
         if score > 0:
             recommended.append((job, score))
 
-    context = {
-        'recommended_jobs': recommended[:5],
-        'all_jobs': jobs[:5],
-        'applied_ids': applied_ids,
-    }
-    return render(request, 'core/seeker_dashboard.html', context)
+    return render(request, 'core/seeker_dashboard.html', {
+    'recommended_jobs': recommended[:5],
+    'all_jobs': jobs[:5],
+    'applied_ids': applied_ids,
+    'saved_jobs': saved_jobs,
+    'saved_job_ids': saved_job_ids,  # ✅ added
+    })
 
 @login_required
 def employer_dashboard(request):
@@ -263,3 +272,155 @@ def update_applicant_status(request, application_id):
         messages.success(request, f"Status updated to {new_status.capitalize()}.")
 
     return redirect('view-applicants', job_id=app.job.id)
+
+@login_required
+def add_experience(request):
+    if request.user.role != 'seeker':
+        return redirect('dashboard')
+    seeker = request.user.jobseekerprofile
+    form = ExperienceForm(request.POST or None)
+    if form.is_valid():
+        exp = form.save(commit=False)
+        exp.seeker = seeker
+        exp.save()
+        messages.success(request, "Experience added.")
+        return redirect('seeker-profile')
+    return render(request, 'core/form_page.html', {'form': form, 'title': 'Add Experience'})
+
+
+@login_required
+def add_education(request):
+    if request.user.role != 'seeker':
+        return redirect('dashboard')
+    seeker = request.user.jobseekerprofile
+    form = EducationForm(request.POST or None)
+    if form.is_valid():
+        edu = form.save(commit=False)
+        edu.seeker = seeker
+        edu.save()
+        messages.success(request, "Education added.")
+        return redirect('seeker-profile')
+    return render(request, 'core/form_page.html', {'form': form, 'title': 'Add Education'})
+
+
+@login_required
+def add_certification(request):
+    if request.user.role != 'seeker':
+        return redirect('dashboard')
+    seeker = request.user.jobseekerprofile
+    form = CertificationForm(request.POST or None)
+    if form.is_valid():
+        cert = form.save(commit=False)
+        cert.seeker = seeker
+        cert.save()
+        messages.success(request, "Certification added.")
+        return redirect('seeker-profile')
+    return render(request, 'core/form_page.html', {'form': form, 'title': 'Add Certification'})
+
+
+@login_required
+def add_portfolio(request):
+    if request.user.role != 'seeker':
+        return redirect('dashboard')
+    seeker = request.user.jobseekerprofile
+    form = PortfolioForm(request.POST or None)
+    if form.is_valid():
+        project = form.save(commit=False)
+        project.seeker = seeker
+        project.save()
+        messages.success(request, "Portfolio project added.")
+        return redirect('seeker-profile')
+    return render(request, 'core/form_page.html', {'form': form, 'title': 'Add Portfolio'})
+
+@login_required
+def edit_experience(request, pk):
+    exp = get_object_or_404(Experience, id=pk, seeker=request.user.jobseekerprofile)
+    form = ExperienceForm(request.POST or None, instance=exp)
+    if form.is_valid():
+        form.save()
+        messages.success(request, "Experience updated.")
+        return redirect('seeker-profile')
+    return render(request, 'core/form_page.html', {'form': form, 'title': 'Edit Experience'})
+
+@login_required
+def delete_experience(request, pk):
+    exp = get_object_or_404(Experience, id=pk, seeker=request.user.jobseekerprofile)
+    exp.delete()
+    messages.success(request, "Experience deleted.")
+    return redirect('seeker-profile')
+
+@login_required
+def edit_education(request, pk):
+    edu = get_object_or_404(Education, id=pk, seeker=request.user.jobseekerprofile)
+    form = EducationForm(request.POST or None, instance=edu)
+    if form.is_valid():
+        form.save()
+        messages.success(request, "Education updated.")
+        return redirect('seeker-profile')
+    return render(request, 'core/form_page.html', {'form': form, 'title': 'Edit Education'})
+
+@login_required
+def delete_education(request, pk):
+    edu = get_object_or_404(Education, id=pk, seeker=request.user.jobseekerprofile)
+    edu.delete()
+    messages.success(request, "Education deleted.")
+    return redirect('seeker-profile')
+
+@login_required
+def edit_certification(request, pk):
+    cert = get_object_or_404(Certification, id=pk, seeker=request.user.jobseekerprofile)
+    form = CertificationForm(request.POST or None, instance=cert)
+    if form.is_valid():
+        form.save()
+        messages.success(request, "Certification updated.")
+        return redirect('seeker-profile')
+    return render(request, 'core/form_page.html', {'form': form, 'title': 'Edit Certification'})
+
+@login_required
+def delete_certification(request, pk):
+    cert = get_object_or_404(Certification, id=pk, seeker=request.user.jobseekerprofile)
+    cert.delete()
+    messages.success(request, "Certification deleted.")
+    return redirect('seeker-profile')
+
+@login_required
+def edit_portfolio(request, pk):
+    portfolio = get_object_or_404(Portfolio, id=pk, seeker=request.user.jobseekerprofile)
+    form = PortfolioForm(request.POST or None, instance=portfolio)
+    if form.is_valid():
+        form.save()
+        messages.success(request, "Portfolio project updated.")
+        return redirect('seeker-profile')
+    return render(request, 'core/form_page.html', {'form': form, 'title': 'Edit Portfolio'})
+
+@login_required
+def delete_portfolio(request, pk):
+    portfolio = get_object_or_404(Portfolio, id=pk, seeker=request.user.jobseekerprofile)
+    portfolio.delete()
+    messages.success(request, "Portfolio project deleted.")
+    return redirect('seeker-profile')
+
+
+@login_required
+def save_job(request, job_id):
+    if request.user.role != 'seeker':
+        return redirect('dashboard')
+
+    seeker = request.user.jobseekerprofile
+    job = get_object_or_404(Job, id=job_id)
+
+    # Prevent duplicates
+    SavedJob.objects.get_or_create(seeker=seeker, job=job)
+    messages.success(request, "Job saved.")
+    return redirect('job-list')
+
+
+@login_required
+def unsave_job(request, job_id):
+    if request.user.role != 'seeker':
+        return redirect('dashboard')
+
+    seeker = request.user.jobseekerprofile
+    SavedJob.objects.filter(seeker=seeker, job_id=job_id).delete()
+    messages.success(request, "Job removed from saved list.")
+    return redirect('seeker-dashboard')  # or 'job-list'

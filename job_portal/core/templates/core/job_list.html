@@ -19,6 +19,11 @@
           {% else %}
             <a href="{% url 'apply-job' job.id %}" class="btn btn-sm btn-success mt-2">Apply</a>
         {% endif %}
+        {% if job.id in saved_job_ids %}
+  <a href="{% url 'unsave-job' job.id %}" class="btn btn-sm btn-outline-danger mt-2">Unsave</a>
+{% else %}
+  <a href="{% url 'save-job' job.id %}" class="btn btn-sm btn-outline-secondary mt-2">Save</a>
+{% endif %}
       </li>
     {% empty %}
       <li class="list-group-item">No jobs found.</li>

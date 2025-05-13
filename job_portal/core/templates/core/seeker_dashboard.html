@@ -1,6 +1,22 @@
 {% extends 'base.html' %}
 {% block title %}Dashboard{% endblock %}
 {% block content %}
+
+<div class="card shadow p-3 mb-4">
+  <h5>❤️ Saved Jobs</h5>
+  <ul class="list-group mt-2">
+    {% for item in saved_jobs %}
+      <li class="list-group-item">
+        <strong>{{ item.job.title }}</strong> — {{ item.job.location }}<br>
+        <a href="{% url 'apply-job' item.job.id %}" class="btn btn-sm btn-success mt-2">Apply</a>
+        <a href="{% url 'unsave-job' item.job.id %}" class="btn btn-sm btn-danger mt-2">Remove</a>
+      </li>
+    {% empty %}
+      <li class="list-group-item">You haven't saved any jobs yet.</li>
+    {% endfor %}
+  </ul>
+</div>
+
 <div class="row">
   <div class="col-md-6">
     <div class="card p-3 shadow mb-4">
@@ -16,6 +32,11 @@
           {% else %}
             <a href="{% url 'apply-job' job.id %}" class="btn btn-sm btn-primary mt-2">Apply</a>
           {% endif %}
+          {% if job.id in saved_job_ids %}
+  <a href="{% url 'unsave-job' job.id %}" class="btn btn-sm btn-outline-danger mt-2">Unsave</a>
+{% else %}
+  <a href="{% url 'save-job' job.id %}" class="btn btn-sm btn-outline-secondary mt-2">Save</a>
+{% endif %}
         </li>
         {% empty %}
           <li class="list-group-item">No recommended jobs found.</li>
@@ -36,6 +57,11 @@
           {% else %}
             <a href="{% url 'apply-job' job.id %}" class="btn btn-sm btn-outline-primary mt-2">Apply</a>
           {% endif %}
+          {% if job.id in saved_job_ids %}
+  <a href="{% url 'unsave-job' job.id %}" class="btn btn-sm btn-outline-danger mt-2">Unsave</a>
+{% else %}
+  <a href="{% url 'save-job' job.id %}" class="btn btn-sm btn-outline-secondary mt-2">Save</a>
+{% endif %}
         </li>
         {% empty %}
           <li class="list-group-item">No jobs posted yet.</li>
@@ -44,4 +70,5 @@
     </div>
   </div>
 </div>
+
 {% endblock %}

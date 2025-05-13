@@ -83,3 +83,45 @@ class JobForm(forms.ModelForm):
             'job_type': forms.Select(attrs={'class': 'form-control'}),
             'expiry_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
         }
+        
+        
+class ExperienceForm(forms.ModelForm):
+    class Meta:
+        model = Experience
+        fields = ['company', 'position', 'start_date', 'end_date']
+        widgets = {
+            'start_date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'end_date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'company': forms.TextInput(attrs={'class': 'form-control'}),
+            'position': forms.TextInput(attrs={'class': 'form-control'}),
+        }
+
+class EducationForm(forms.ModelForm):
+    class Meta:
+        model = Education
+        fields = ['institute', 'degree', 'start_year', 'end_year']
+        widgets = {
+            'institute': forms.TextInput(attrs={'class': 'form-control'}),
+            'degree': forms.TextInput(attrs={'class': 'form-control'}),
+            'start_year': forms.NumberInput(attrs={'class': 'form-control'}),
+            'end_year': forms.NumberInput(attrs={'class': 'form-control'}),
+        }
+
+class CertificationForm(forms.ModelForm):
+    class Meta:
+        model = Certification
+        fields = ['name', 'issuer', 'issue_date']
+        widgets = {
+            'name': forms.TextInput(attrs={'class': 'form-control'}),
+            'issuer': forms.TextInput(attrs={'class': 'form-control'}),
+            'issue_date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+        }
+
+class PortfolioForm(forms.ModelForm):
+    class Meta:
+        model = Portfolio
+        fields = ['project_title', 'url']
+        widgets = {
+            'project_title': forms.TextInput(attrs={'class': 'form-control'}),
+            'url': forms.URLInput(attrs={'class': 'form-control'}),
+        }

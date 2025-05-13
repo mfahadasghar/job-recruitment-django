@@ -23,7 +23,7 @@ class JobSeekerProfile(models.Model):
     location = models.CharField(max_length=100)
     resume = models.FileField(upload_to='resumes/')
     bio = models.TextField(blank=True)
-    skills = models.ManyToManyField(Skill, blank=True)  # ✅ Changed from TextField
+    skills = models.ManyToManyField(Skill, blank=True) 
     
 class Education(models.Model):
     seeker = models.ForeignKey(JobSeekerProfile, on_delete=models.CASCADE)
@@ -81,6 +81,9 @@ class SavedJob(models.Model):
     seeker = models.ForeignKey(JobSeekerProfile, on_delete=models.CASCADE)
     job = models.ForeignKey(Job, on_delete=models.CASCADE)
     saved_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('seeker', 'job')  # 🔐 Prevent duplicate saves
 
 class Application(models.Model):
     job = models.ForeignKey(Job, on_delete=models.CASCADE)

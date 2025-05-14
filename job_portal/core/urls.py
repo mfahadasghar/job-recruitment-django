@@ -33,5 +33,8 @@ urlpatterns = [
     path('seeker/portfolio/<int:pk>/delete/', delete_portfolio, name='delete-portfolio'),
     path('jobs/<int:job_id>/save/', save_job, name='save-job'),
     path('jobs/<int:job_id>/unsave/', unsave_job, name='unsave-job'),
+    path('subscription/', subscription_plans, name='subscription-plans'),
+    path('subscription/purchase/<int:plan_id>/', purchase_subscription, name='purchase-subscription'),
+    path('payments/', payment_history, name='payment-history'),
 
 ]

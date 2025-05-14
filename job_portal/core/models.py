@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+from django.utils import timezone
 
 class User(AbstractUser):
     ROLE_CHOICES = (
@@ -110,23 +111,31 @@ class InterviewFeedback(models.Model):
     
 class SubscriptionPlan(models.Model):
     name = models.CharField(max_length=50)
-    price = models.FloatField()
-    job_post_limit = models.IntegerField()
-    duration_days = models.IntegerField()
+    price = models.DecimalField(max_digits=6, decimal_places=2)
+    max_jobs = models.PositiveIntegerField(null=True, blank=True)  # None = unlimited
+
+    def __str__(self):
+        return self.name
 
 class EmployerSubscription(models.Model):
-    employer = models.ForeignKey(EmployerProfile, on_delete=models.CASCADE)
+    employer = models.OneToOneField(EmployerProfile, on_delete=models.CASCADE)
     plan = models.ForeignKey(SubscriptionPlan, on_delete=models.SET_NULL, null=True)
-    start_date = models.DateField()
-    end_date = models.DateField()
-    is_active = models.BooleanField(default=True)
+    start_date = models.DateTimeField(default=timezone.now)
+
+    def remaining_jobs(self):
+        if self.plan and self.plan.max_jobs is not None:
+            posted_jobs = Job.objects.filter(employer=self.employer).count()
+            return max(self.plan.max_jobs - posted_jobs, 0)
+        return None  # Unlimited
 
 class Payment(models.Model):
-    subscription = models.ForeignKey(EmployerSubscription, on_delete=models.CASCADE)
-    amount = models.FloatField()
-    method = models.CharField(max_length=30)
+    employer = models.ForeignKey(EmployerProfile, on_delete=models.CASCADE)
+    plan = models.ForeignKey(SubscriptionPlan, on_delete=models.SET_NULL, null=True)
+    amount = models.DecimalField(max_digits=6, decimal_places=2)
     timestamp = models.DateTimeField(auto_now_add=True)
-    invoice_id = models.CharField(max_length=100)
+
+    def __str__(self):
+        return f"{self.employer.user.username} - {self.plan.name} - ${self.amount}"
 
 class Notification(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)

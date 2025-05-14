@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% block content %}
+<h4>Payment History</h4>
+<ul class="list-group mt-3">
+  {% for payment in payments %}
+    <li class="list-group-item">
+      {{ payment.timestamp|date:"M d, Y H:i" }} — <strong>{{ payment.plan.name }}</strong> — ${{ payment.amount }}
+    </li>
+  {% empty %}
+    <li class="list-group-item">No payments made yet.</li>
+  {% endfor %}
+</ul>
+{% endblock %}

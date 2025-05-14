@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block content %}
+<h4>Select a Subscription Plan</h4>
+<ul class="list-group mt-3">
+  {% for plan in plans %}
+    <li class="list-group-item d-flex justify-content-between align-items-center">
+      <div>
+        <strong>{{ plan.name }}</strong> — ${{ plan.price }}
+        {% if plan.max_jobs %}<br>Post up to {{ plan.max_jobs }} jobs{% else %}<br>Unlimited postings{% endif %}
+      </div>
+      <a href="{% url 'purchase-subscription' plan.id %}" class="btn btn-success">Activate</a>
+    </li>
+  {% endfor %}
+</ul>
+{% endblock %}

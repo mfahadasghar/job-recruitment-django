@@ -92,16 +92,31 @@ def post_job(request):
         messages.error(request, "Access denied.")
         return redirect('dashboard')
 
+    employer = request.user.employerprofile
+    subscription = getattr(employer, 'employersubscription', None)
+    job_count = Job.objects.filter(employer=employer).count()
+
+    # Check job posting limit
+    if not subscription and job_count >= 1:
+        messages.error(request, "You can only post 1 job for free. Purchase a subscription to post more.")
+        return redirect('my-jobs')
+
+    if subscription and subscription.plan.max_jobs is not None:
+        if job_count >= subscription.plan.max_jobs:
+            messages.error(request, "Job posting limit reached for your plan.")
+            return redirect('my-jobs')
+
     if request.method == 'POST':
         form = JobForm(request.POST)
         if form.is_valid():
             job = form.save(commit=False)
-            job.employer = request.user.employerprofile  # requires related_name or OneToOne
+            job.employer = employer
             job.save()
             messages.success(request, "Job posted successfully!")
             return redirect('my-jobs')
     else:
         form = JobForm()
+
     return render(request, 'core/post_job.html', {'form': form})
 
 
@@ -424,3 +439,49 @@ def unsave_job(request, job_id):
     SavedJob.objects.filter(seeker=seeker, job_id=job_id).delete()
     messages.success(request, "Job removed from saved list.")
     return redirect('seeker-dashboard')  # or 'job-list'
+
+
+@login_required
+def subscription_plans(request):
+    if request.user.role != 'employer':
+        messages.error(request, "Access denied.")
+        return redirect('dashboard')
+
+    plans = SubscriptionPlan.objects.all()
+    return render(request, 'core/subscription_plans.html', {'plans': plans})
+
+
+@login_required
+def purchase_subscription(request, plan_id):
+    if request.user.role != 'employer':
+        messages.error(request, "Access denied.")
+        return redirect('dashboard')
+
+    plan = get_object_or_404(SubscriptionPlan, id=plan_id)
+    employer = request.user.employerprofile
+
+    # Save subscription
+    EmployerSubscription.objects.update_or_create(
+        employer=employer,
+        defaults={'plan': plan}
+    )
+
+    # Save payment
+    Payment.objects.create(
+        employer=employer,
+        plan=plan,
+        amount=plan.price
+    )
+
+    messages.success(request, f"{plan.name} plan activated!")
+    return redirect('my-jobs')
+
+
+@login_required
+def payment_history(request):
+    if request.user.role != 'employer':
+        messages.error(request, "Access denied.")
+        return redirect('dashboard')
+
+    payments = Payment.objects.filter(employer=request.user.employerprofile).order_by('-timestamp')
+    return render(request, 'core/payment_history.html', {'payments': payments})

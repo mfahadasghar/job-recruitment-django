@@ -10,6 +10,7 @@
         <strong>{{ item.job.title }}</strong> — {{ item.job.location }}<br>
         <a href="{% url 'apply-job' item.job.id %}" class="btn btn-sm btn-success mt-2">Apply</a>
         <a href="{% url 'unsave-job' item.job.id %}" class="btn btn-sm btn-danger mt-2">Remove</a>
+        <a href="{% url 'job-detail' item.job.id %}" class="btn btn-sm btn-outline-info mt-2">View Details</a>
       </li>
     {% empty %}
       <li class="list-group-item">You haven't saved any jobs yet.</li>
@@ -37,6 +38,7 @@
 {% else %}
   <a href="{% url 'save-job' job.id %}" class="btn btn-sm btn-outline-secondary mt-2">Save</a>
 {% endif %}
+  <a href="{% url 'job-detail' job.id %}" class="btn btn-sm btn-outline-info mt-2">View Details</a>
         </li>
         {% empty %}
           <li class="list-group-item">No recommended jobs found.</li>
@@ -62,6 +64,7 @@
 {% else %}
   <a href="{% url 'save-job' job.id %}" class="btn btn-sm btn-outline-secondary mt-2">Save</a>
 {% endif %}
+  <a href="{% url 'job-detail' job.id %}" class="btn btn-sm btn-outline-info mt-2">View Details</a>
         </li>
         {% empty %}
           <li class="list-group-item">No jobs posted yet.</li>

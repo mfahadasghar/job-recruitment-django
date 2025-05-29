@@ -152,21 +152,15 @@ class Review(models.Model):
 
 class Report(models.Model):
     reporter = models.ForeignKey(User, on_delete=models.CASCADE)
-    reported_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='reported_user')
+    reported_job = models.ForeignKey(Job, on_delete=models.CASCADE)
     reason = models.TextField()
-    created_at = models.DateTimeField(auto_now_add=True)
+    response = models.TextField(blank=True, null=True)  # ✅ Optional admin response
     resolved = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
 
-class ReportResponse(models.Model):
-    report = models.OneToOneField(Report, on_delete=models.CASCADE)
-    response_message = models.TextField()
-    resolved_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='resolved_by')
-    timestamp = models.DateTimeField(auto_now_add=True)
-
-class StaticPage(models.Model):
-    slug = models.SlugField(unique=True)
-    title = models.CharField(max_length=100)
-    content = models.TextField()
+    def __str__(self):
+        return f"Report by {self.reporter.username} on {self.reported_job.title}"
+    
 
 class ContactMessage(models.Model):
     name = models.CharField(max_length=100)

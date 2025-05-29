@@ -125,3 +125,11 @@ class PortfolioForm(forms.ModelForm):
             'project_title': forms.TextInput(attrs={'class': 'form-control'}),
             'url': forms.URLInput(attrs={'class': 'form-control'}),
         }
+
+class JobReportForm(forms.ModelForm):
+    class Meta:
+        model = Report
+        fields = ['reason']
+        widgets = {
+            'reason': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Describe the issue...'}),
+        }

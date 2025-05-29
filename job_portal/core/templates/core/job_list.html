@@ -13,7 +13,7 @@
   <ul class="list-group mt-3">
     {% for job in jobs %}
       <li class="list-group-item">
-        <strong>{{ job.title }}</strong> - {{ job.location }}<br>
+        <strong><a href="{% url 'job-detail' job.id %}">{{ job.title }}</a></strong> - {{ job.location }}<br>
           {% if job.id in applied_ids %}
             <span class="badge bg-secondary">Already Applied</span>
           {% else %}

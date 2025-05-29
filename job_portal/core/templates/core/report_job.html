@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="card p-4 shadow">
+  <h4>Report Job: {{ job.title }}</h4>
+  <form method="post">
+    {% csrf_token %}
+    <div class="form-group">
+      {{ form.reason.label_tag }}
+      {{ form.reason }}
+    </div>
+    <button class="btn btn-danger mt-3">Submit Report</button>
+  </form>
+</div>
+{% endblock %}

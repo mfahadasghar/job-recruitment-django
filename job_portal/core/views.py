@@ -485,3 +485,50 @@ def payment_history(request):
 
     payments = Payment.objects.filter(employer=request.user.employerprofile).order_by('-timestamp')
     return render(request, 'core/payment_history.html', {'payments': payments})
+
+@login_required
+def report_job(request, job_id):
+    job = get_object_or_404(Job, id=job_id)
+    if request.method == 'POST':
+        form = JobReportForm(request.POST)
+        if form.is_valid():
+            report = form.save(commit=False)
+            report.reporter = request.user
+            report.reported_job = job
+            report.save()
+            messages.success(request, "Your report has been submitted.")
+            return redirect('job-detail', job_id=job_id)
+    else:
+        form = JobReportForm()
+    return render(request, 'core/report_job.html', {'form': form, 'job': job})
+
+@login_required
+def job_detail(request, job_id):
+    job = get_object_or_404(Job, id=job_id)
+
+    applied = False
+    saved = False
+
+    if request.user.role == 'seeker':
+        seeker = request.user.jobseekerprofile
+        applied = Application.objects.filter(job=job, seeker=seeker).exists()
+        saved = SavedJob.objects.filter(job=job, seeker=seeker).exists()
+
+    return render(request, 'core/job_detail.html', {
+        'job': job,
+        'applied': applied,
+        'saved': saved
+    })
+    
+@login_required
+def view_reports(request):
+    if request.user.role != 'admin':  # Adjust this as per your user roles
+        messages.error(request, "Access denied.")
+        return redirect('dashboard')
+
+    reports = Report.objects.select_related('reporter', 'reported_job').order_by('-created_at')
+    return render(request, 'core/view_reports.html', {'reports': reports})
+
+
+def landing_page(request):
+    return render(request, 'core/landing.html')

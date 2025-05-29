@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% block title %}{{ job.title }} - {{ job.employer.company_name }}{% endblock %}
+{% block content %}
+<div class="card p-4 shadow">
+  <h3>{{ job.title }}</h3>
+  <h5 class="text-muted">{{ job.employer.company_name }}</h5>
+  <p><strong>Location:</strong> {{ job.location }}</p>
+  <p><strong>Salary:</strong> ${{ job.salary_min }} - ${{ job.salary_max }}</p>
+  <p><strong>Type:</strong> {{ job.get_job_type_display }}</p>
+  <p><strong>Required Skills:</strong> {{ job.skills_required }}</p>
+  <p class="mt-3">{{ job.description|linebreaks }}</p>
+
+  {% if request.user.role == 'seeker' %}
+    <div class="mt-4">
+      {% if not applied %}
+        <a href="{% url 'apply-job' job.id %}" class="btn btn-success">Apply Now</a>
+      {% else %}
+        <span class="badge bg-secondary">You already applied</span>
+      {% endif %}
+
+      {% if saved %}
+        <a href="{% url 'unsave-job' job.id %}" class="btn btn-outline-danger">Unsave</a>
+      {% else %}
+        <a href="{% url 'save-job' job.id %}" class="btn btn-outline-secondary">Save</a>
+      {% endif %}
+
+      <a href="{% url 'report-job' job.id %}" class="btn btn-outline-warning">Report Job</a>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

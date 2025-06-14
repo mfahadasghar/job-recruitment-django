@@ -1,19 +1,159 @@
 {% extends 'base.html' %}
 {% block title %}Employer Dashboard{% endblock %}
 {% block content %}
-<div class="card shadow p-4">
-  <h4>Your Job Postings</h4>
-  <ul class="list-group mt-3">
+<div class="container mt-4">
+  <h3 class="mb-4 text-center">Your Job Postings</h3>
+
+  <div class="row g-4">
     {% for item in job_data %}
-      <li class="list-group-item">
-        <strong>{{ item.job.title }}</strong> – {{ item.job.location }}<br>
-        Posted on: {{ item.job.created_at|date:"M d, Y" }}<br>
-        Applicants: {{ item.applicant_count }} |
-        <a href="{% url 'view-applicants' item.job.id %}" class="btn btn-sm btn-info mt-2">View Applicants</a>
-      </li>
+      <div class="col-md-4">
+        <div class="card p-3 position-relative" style="border-radius: 10px">
+  <!-- Top-right icons -->
+  <div class="position-absolute top-0 end-0 p-3">
+    <a 
+      href="#" 
+      class="text-black me-2" 
+      data-bs-toggle="modal" 
+      data-bs-target="#editJobModal{{ item.job.id }}">
+      <i class="bi bi-pencil-fill fs-6"></i></a>
+    <a 
+      href="#" 
+      class="text-black" 
+      data-bs-toggle="modal" 
+      data-bs-target="#deleteJobModal{{ item.job.id }}">
+      <i class="bi bi-trash-fill fs-6"></i></a>
+  </div>
+
+  <h5 class="card-title mb-3">{{ item.job.title }}</h5>
+  <p class="card-text mb-2"><i class="bi bi-geo-alt-fill me-1"></i>{{ item.job.location }}</p>
+  <div class="mb-3">
+    <span class="badge bg-secondary">{{ item.applicant_count }} Applications</span>
+    <span class="badge bg-secondary">{{ item.job.salary_min|floatformat:0 }} - {{ item.job.salary_max|floatformat:0 }} PKR</span>
+    <span class="badge bg-secondary">
+      {% if item.job.job_type == 'full' %}Full-time{% elif item.job.job_type == 'remote' %}Remote{% endif %}
+    </span>
+  </div>
+  <small class="text-muted d-block mt-2">Posted on: {{ item.job.created_at|date:"M d, Y" }}</small>
+  <div class="mt-3">
+    <a 
+      href="{% url 'view-applicants' item.job.id %}" 
+      class="btn btn-primary w-100">
+      <i class="bi bi-eye-fill me-1"></i>View Applicants
+    </a>
+  </div>
+</div>
+
+<!-- Edit Job Modal -->
+<div class="modal fade" id="editJobModal{{ item.job.id }}" tabindex="-1" aria-labelledby="editJobModalLabel{{ item.job.id }}" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form method="post" action="{% url 'edit-job' item.job.id %}">
+        {% csrf_token %}
+        <div class="modal-header">
+          <h5 class="modal-title" id="editJobModalLabel{{ item.job.id }}">Edit Job</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label for="title{{ item.job.id }}" class="form-label">Job Title</label>
+            <input type="text" class="form-control" id="title{{ item.job.id }}" name="title" value="{{ item.job.title }}" required>
+          </div>
+          <div class="mb-3">
+  <label for="description{{ item.job.id }}" class="form-label">Job Description</label>
+  <textarea class="form-control" id="description{{ item.job.id }}" name="description" rows="4" required>{{ item.job.description }}</textarea>
+</div>
+
+<div class="mb-3">
+  <label for="skills_required{{ item.job.id }}" class="form-label">Skills Required</label>
+  <input type="text" class="form-control" id="skills_required{{ item.job.id }}" name="skills_required" value="{{ item.job.skills_required }}" required>
+</div>
+
+          <div class="mb-3">
+            <label for="location{{ item.job.id }}" class="form-label">Location</label>
+            <input type="text" class="form-control" id="location{{ item.job.id }}" name="location" value="{{ item.job.location }}" required>
+          </div>
+          <div class="mb-3">
+            <label for="salary_min{{ item.job.id }}" class="form-label">Minimum Salary</label>
+            <input type="number" class="form-control" id="salary_min{{ item.job.id }}" name="salary_min" value="{{ item.job.salary_min }}" min="0" required>
+          </div>
+          <div class="mb-3">
+            <label for="salary_max{{ item.job.id }}" class="form-label">Maximum Salary</label>
+            <input type="number" class="form-control" id="salary_max{{ item.job.id }}" name="salary_max" value="{{ item.job.salary_max }}" min="0" required>
+          </div>
+          <div class="mb-3">
+            <label for="job_type{{ item.job.id }}" class="form-label">Job Type</label>
+            <select class="form-select" id="job_type{{ item.job.id }}" name="job_type" required>
+              <option value="full" {% if item.job.job_type == 'full' %}selected{% endif %}>Full-time</option>
+              <option value="remote" {% if item.job.job_type == 'remote' %}selected{% endif %}>Remote</option>
+            </select>
+          </div>
+
+          <div class="mb-3">
+  <label for="expiry_date{{ item.job.id }}" class="form-label">Expiry Date</label>
+  <input type="date" class="form-control" id="expiry_date{{ item.job.id }}" name="expiry_date" value="{{ item.job.expiry_date|date:'Y-m-d' }}" required>
+</div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Job Modal -->
+<div class="modal fade" id="deleteJobModal{{ item.job.id }}" tabindex="-1" aria-labelledby="deleteJobModalLabel{{ item.job.id }}" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form method="post" action="{% url 'delete-job' item.job.id %}">
+        {% csrf_token %}
+        <div class="modal-header">
+          <h5 class="modal-title" id="deleteJobModalLabel{{ item.job.id }}">Delete Job</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          Are you sure you want to delete the job "<strong>{{ item.job.title }}</strong>"?
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-danger">Delete</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+      </div>
     {% empty %}
-      <li class="list-group-item">You haven't posted any jobs yet.</li>
+      <div class="col-12">
+        <div class="alert alert-warning text-center">
+          You haven't posted any jobs yet.
+        </div>
+      </div>
     {% endfor %}
-  </ul>
+  </div>
+
+  <!-- Pagination -->
+  <div class="pagination mt-4 d-flex justify-content-center">
+    <ul class="pagination mb-0">
+      {% if job_data.has_previous %}
+        <li class="page-item">
+          <a class="page-link" href="?page={{ job_data.previous_page_number }}">Previous</a>
+        </li>
+      {% endif %}
+
+      {% for num in job_data.paginator.page_range %}
+        <li class="page-item {% if job_data.number == num %}active{% endif %}">
+          <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+        </li>
+      {% endfor %}
+
+      {% if job_data.has_next %}
+        <li class="page-item">
+          <a class="page-link" href="?page={{ job_data.next_page_number }}">Next</a>
+        </li>
+      {% endif %}
+    </ul>
+  </div>
 </div>
 {% endblock %}

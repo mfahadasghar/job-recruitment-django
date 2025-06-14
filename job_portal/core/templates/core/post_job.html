@@ -1,6 +1,8 @@
 {% extends 'base.html' %}
 {% block title %}Post Job{% endblock %}
 {% block content %}
+
+<div class="container mt-4 mb-4">
 <div class="card p-4 shadow">
   <h4>Post a New Job</h4>
   <form method="POST">
@@ -8,5 +10,6 @@
     {{ form.as_p }}
     <button class="btn btn-primary">Post Job</button>
   </form>
+</div>
 </div>
 {% endblock %}

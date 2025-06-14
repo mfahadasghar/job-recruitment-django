@@ -33,6 +33,29 @@
         </div>
       {% endfor %}
     </div>
+
+    <!-- Pagination -->
+    <div class="pagination mt-4 d-flex justify-content-center">
+      <ul class="pagination mb-0">
+        {% if applications.has_previous %}
+          <li class="page-item">
+            <a class="page-link" href="?page={{ applications.previous_page_number }}">Previous</a>
+          </li>
+        {% endif %}
+
+        {% for num in applications.paginator.page_range %}
+          <li class="page-item {% if applications.number == num %}active{% endif %}">
+            <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+          </li>
+        {% endfor %}
+
+        {% if applications.has_next %}
+          <li class="page-item">
+            <a class="page-link" href="?page={{ applications.next_page_number }}">Next</a>
+          </li>
+        {% endif %}
+      </ul>
+    </div>
   {% endif %}
 </div>
 {% endblock %}

@@ -1,39 +1,185 @@
 {% extends 'base.html' %}
 {% block title %}Applicants for {{ job.title }}{% endblock %}
 {% block content %}
-<div class="card shadow p-4">
-  <h4>Applicants for: {{ job.title }}</h4>
-  <ul class="list-group mt-3">
-    {% for app in applications %}
-      <li class="list-group-item">
-        <strong>{{ app.seeker.user.username }}</strong><br>
-        Applied on: {{ app.applied_at|date:"M d, Y H:i" }}<br>
-        <form method="POST" action="{% url 'update-applicant-status' app.id %}">
-            {% csrf_token %}
-            <div class="input-group mt-2">
-              <select name="status" class="form-select">
-                <option value="applied" {% if app.status == 'applied' %}selected{% endif %}>Applied</option>
-                <option value="interview" {% if app.status == 'interview' %}selected{% endif %}>Interview</option>
-                <option value="rejected" {% if app.status == 'rejected' %}selected{% endif %}>Rejected</option>
-                <option value="hired" {% if app.status == 'hired' %}selected{% endif %}>Hired</option>
-              </select>
-              <button class="btn btn-outline-success" type="submit">Update</button>
-            </div>
-          </form>
-          <br>
-        <a href="{{ app.resume.url }}" target="_blank" class="btn btn-sm btn-outline-primary">View Resume</a>
-        <a 
-          href="{% url 'thread' app.seeker.user.id %}" 
-          class="btn btn-outline-primary">
-          <i class="bi bi-chat-fill me-1"></i>Message Applicant
-        </a>
-        {% if app.cover_letter %}
-          <p class="mt-2"><strong>Cover Letter:</strong> {{ app.cover_letter|truncatewords:40 }}</p>
+<div class="container p-4">
+  <div class="card p-4" style="border-radius: 10px">
+    <!-- Header Section with Filter -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h4>{{ job.title }}</h4>
+      <form method="GET" action="" class="d-flex align-items-center">
+        <label for="filterStatus" class="form-label me-2 mb-0"><strong>Filter by Status:</strong></label>
+        <select id="filterStatus" name="status" class="form-select me-2">
+          <option value="">All</option>
+          <option value="applied" {% if request.GET.status == 'applied' %}selected{% endif %}>
+            Applied
+          </option>
+          <option value="interview" {% if request.GET.status == 'interview' %}selected{% endif %}>
+            Interview
+          </option>
+          <option value="rejected" {% if request.GET.status == 'rejected' %}selected{% endif %}>
+            Rejected
+          </option>
+          <option value="hired" {% if request.GET.status == 'hired' %}selected{% endif %}>
+            Hired
+          </option>
+        </select>
+        <button class="btn btn-primary" type="submit">
+          Filter
+        </button>
+      </form>
+    </div>
+    <hr>
+    {% if applications|length == 0 %}
+      <div class="alert alert-warning">
+        No applicants for this job.
+      </div>
+    {% else %}
+
+    <div class="row g-0 mt-3">
+      <!-- Left side: Applicant List -->
+      <div class="col-md-4 border-end pe-4">
+        <ul class="list-group">
+          {% for app in applications %}
+            <a 
+              href="?selected={{ app.id }}"
+              class="list-group-item p-3 d-flex align-items-center {% if request.GET.selected|add:'0' == app.id %}active{% endif %} shadow-sm mb-2"
+              style="border-radius: 10px">
+               <div class="flex-grow-1">
+                 <h6>{{ app.seeker.user.username|capfirst }}</h6>
+                 <small>Applied on: {{ app.applied_at|date:"M d, Y H:i" }}</small>
+               </div>
+               <span class="badge 
+                 {% if app.status == 'applied' %}bg-warning{% endif %}
+                 {% if app.status == 'interview' %}bg-info{% endif %}
+                 {% if app.status == 'rejected' %}bg-danger{% endif %}
+                 {% if app.status == 'hired' %}bg-success{% endif %}">
+                 {{ app.status|capfirst }}
+               </span>
+            </a>
+          {% endfor %}
+        </ul>
+      </div>
+
+      <!-- Right side: Applicant Detail -->
+      <div class="col-md-8 ps-4">
+        {% if request.GET.selected %}
+          {% for app in applications %}
+            {% if app.id == request.GET.selected|add:'0' %}
+              <div>
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                   <div>
+                     <h5>{{ app.seeker.user.username|capfirst }}</h5>
+                     <p>Location: {{ app.seeker.location|default:'-' }}</p>
+                     <p>Skills: 
+                         {% for skill in app.seeker.skills.all %}
+                           <span class="badge bg-secondary">{{ skill.name }}</span>
+                         {% empty %}
+                           <span>-</span>
+                         {% endfor %}
+                      </p>
+                   </div>
+                   <span class="badge 
+                     {% if app.status == 'applied' %}bg-warning{% endif %}
+                     {% if app.status == 'interview' %}bg-info{% endif %}
+                     {% if app.status == 'rejected' %}bg-danger{% endif %}
+                     {% if app.status == 'hired' %}bg-success{% endif %}">
+                     {{ app.status|capfirst }}
+                   </span>
+                 </div>
+
+                 <div class="mb-3">
+                   <a 
+                     href="{{ app.resume.url }}"
+                     target="_blank"
+                     class="btn btn-outline-primary me-2">
+                     View Resume
+                   </a>
+                   <a 
+                     href="{% url 'inbox' %}?thread={{ app.seeker.user.id }}"
+                     class="btn btn-outline-info">
+                     <i class="bi bi-chat-fill me-1"></i>Message Applicant
+                   </a>
+                 </div>
+
+                 <form method="POST" action="{% url 'update-applicant-status' app.id %}" class="input-group mt-3 mb-4">
+                   {% csrf_token %}
+                   <select name="status" class="form-select">
+                     <option value="applied" {% if app.status == 'applied' %}selected{% endif %}>
+                       Applied
+                     </option>
+                     <option value="interview" {% if app.status == 'interview' %}selected{% endif %}>
+                       Interview
+                     </option>
+                     <option value="rejected" {% if app.status == 'rejected' %}selected{% endif %}>
+                       Rejected
+                     </option>
+                     <option value="hired" {% if app.status == 'hired' %}selected{% endif %}>
+                       Hired
+                     </option>
+                   </select>
+                   <button class="btn btn-outline-success" type="submit">
+                     Update
+                   </button>
+                 </form>
+
+                 <hr>
+
+                 <h6>Education</h6>
+                 <ul class="list-group mb-3">
+                   {% for education in app.seeker.education.all %}
+                     <li class="list-group-item">
+                       <strong>{{ education.degree }}</strong> at {{ education.institution }}
+                       ({{ education.start_year }} - {{ education.end_year }})
+                     </li>
+                   {% empty %}
+                     <li class="list-group-item">No education</li>
+                   {% endfor %}
+                 </ul>
+
+                 <h6>Experience</h6>
+                 <ul class="list-group mb-3">
+                   {% for exp in app.seeker.experience.all %}
+                     <li class="list-group-item">
+                       <strong>{{ exp.role }}</strong> at {{ exp.company }}
+                       ({{ exp.start_year }} - {{ exp.end_year }})
+                     </li>
+                   {% empty %}
+                     <li class="list-group-item">No experience</li>
+                   {% endfor %}
+                 </ul>
+
+                 <h6>Certificates</h6>
+                 <ul class="list-group mb-3">
+                   {% for cert in app.seeker.certificates.all %}
+                     <li class="list-group-item">
+                       <strong>{{ cert.name }}</strong> from {{ cert.issuer }}
+                     </li> 
+                   {% empty %}
+                     <li class="list-group-item">No certificates</li>
+                   {% endfor %}
+                 </ul>
+
+                 <h6>Portfolio</h6>
+                 <ul class="list-group mb-3">
+                   {% for port in app.seeker.portfolio.all %}
+                     <li class="list-group-item">
+                       <a href="{{ port.link }}">{{ port.title }}</a>
+                     </li>
+                   {% empty %}
+                     <li class="list-group-item">No portfolio</li>
+                   {% endfor %}
+                 </ul>
+               </div>
+            {% endif %}
+          {% endfor %}
+        {% else %}
+          <div class="alert alert-info">
+            Select an applicant from the left side to view details.
+          </div>
         {% endif %}
-      </li>
-    {% empty %}
-      <li class="list-group-item">No applications yet for this job.</li>
-    {% endfor %}
-  </ul>
-</div>
+      </div>
+    </div><!-- row -->
+    {% endif %}
+  </div><!-- card -->
+</div><!-- container -->
 {% endblock %}

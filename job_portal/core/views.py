@@ -9,6 +9,7 @@ from .models import *
 from django.db.models import Q
 from django.views.decorators.http import require_POST
 from datetime import datetime
+from django.core.paginator import Paginator
 
 def register(request):
     if request.method == 'POST':
@@ -157,7 +158,7 @@ def edit_job(request, job_id):
         if form.is_valid():
             form.save()
             messages.success(request, 'Job updated successfully.')
-            return redirect('my-jobs')
+            return redirect('employer-dashboard')
     else:
         form = JobForm(instance=job)
     
@@ -248,20 +249,26 @@ def employer_dashboard(request):
             'applicant_count': applicants.count()
         })
 
-    return render(request, 'core/employer_dashboard.html', {'job_data': job_data})
+    paginator = Paginator(job_data, 6)  # show 6 per page
+    page = request.GET.get('page')
+    page_obj = paginator.get_page(page)
 
-@login_required
+    context = {
+        'job_data': page_obj,
+    }
+    return render(request, 'core/employer_dashboard.html', context)
+
 def view_applicants(request, job_id):
-    if request.user.role != 'employer':
-        messages.error(request, "Access denied.")
-        return redirect('dashboard')
+    job = get_object_or_404(Job, id=job_id)
+    applications = Application.objects.filter(job=job)
 
-    job = get_object_or_404(Job, id=job_id, employer=request.user.employerprofile)
-    applications = Application.objects.filter(job=job).select_related('seeker__user')
+    status = request.GET.get('status')
+    if status:
+        applications = applications.filter(status=status)
 
     return render(request, 'core/view_applicants.html', {
         'job': job,
-        'applications': applications
+        'applications': applications,
     })
     
 @require_POST
@@ -552,8 +559,12 @@ def saved_jobs_page(request):
     seeker = request.user.jobseekerprofile
     saved_jobs = SavedJob.objects.filter(seeker=seeker).select_related('job')
 
+    paginator = Paginator(saved_jobs, 6)  # show 6 per page
+    page = request.GET.get('page')
+    page_obj = paginator.get_page(page)
+
     return render(request, 'core/saved_jobs.html', {
-        'saved_jobs': saved_jobs
+        'saved_jobs': page_obj
     })
     
 @login_required
@@ -565,8 +576,12 @@ def applied_jobs_page(request):
     seeker = request.user.jobseekerprofile
     applications = Application.objects.filter(seeker=seeker).select_related('job')
 
+    paginator = Paginator(applications, 6)  # show 6 applications per page
+    page = request.GET.get('page')
+    page_obj = paginator.get_page(page)
+
     return render(request, 'core/applied_jobs.html', {
-        'applications': applications
+        'applications': page_obj
     })
     
 @login_required
@@ -636,3 +651,4 @@ def thread(request, recipient_id):
         "recipient": recipient,
     }
     return render(request, 'core/thread.html', context)
+

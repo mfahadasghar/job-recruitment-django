@@ -28,27 +28,27 @@ class JobSeekerProfile(models.Model):
     skills = models.ManyToManyField(Skill, blank=True) 
     
 class Education(models.Model):
-    seeker = models.ForeignKey(JobSeekerProfile, on_delete=models.CASCADE)
+    seeker = models.ForeignKey(JobSeekerProfile, related_name='education', on_delete=models.CASCADE)
     institute = models.CharField(max_length=100)
     degree = models.CharField(max_length=100)
     start_year = models.PositiveIntegerField()
     end_year = models.PositiveIntegerField()
 
 class Experience(models.Model):
-    seeker = models.ForeignKey(JobSeekerProfile, on_delete=models.CASCADE)
+    seeker = models.ForeignKey(JobSeekerProfile,related_name='experience', on_delete=models.CASCADE)
     company = models.CharField(max_length=100)
     position = models.CharField(max_length=100)
     start_date = models.DateField()
     end_date = models.DateField(null=True, blank=True)
 
 class Certification(models.Model):
-    seeker = models.ForeignKey(JobSeekerProfile, on_delete=models.CASCADE)
+    seeker = models.ForeignKey(JobSeekerProfile,related_name='certificates', on_delete=models.CASCADE)
     name = models.CharField(max_length=100)
     issuer = models.CharField(max_length=100)
     issue_date = models.DateField()
 
 class Portfolio(models.Model):
-    seeker = models.ForeignKey(JobSeekerProfile, on_delete=models.CASCADE)
+    seeker = models.ForeignKey(JobSeekerProfile, related_name='portfolio', on_delete=models.CASCADE)
     project_title = models.CharField(max_length=100)
     url = models.URLField()
 

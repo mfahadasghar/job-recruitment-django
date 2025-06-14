@@ -1,11 +1,11 @@
 {% extends 'base.html' %}
 {% block title %}Job Search{% endblock %}
 {% block content %}
-<div class="container-fluid py-5" style="background:rgb(255, 255, 255)">
+<div class="container-fluid py-5" >
  
 <!-- Search Section -->
   <div class="container mb-0" style="max-width: 800px;">
-    <form class="input-group p-2 border shadow-lg bg-light rounded align-items-center" style="border-radius: 50px">
+    <form class="input-group p-2 shadow-lg bg-light rounded align-items-center" style="border: 1px solid black; border-radius: 50px">
       <span class="input-group-text bg-transparent border-0 ps-4"><i class="bi bi-briefcase-fill text-muted"></i></span>
       <input 
         type="text" 
@@ -50,7 +50,7 @@
           <a 
             href="?job={{ job.id }}{% if search %}&search={{ search|urlencode }}{% endif %}{% if location %}&location={{ location|urlencode }}{% endif %}{% if page_obj.number %}&page={{ page_obj.number }}{% endif %}"
             class="list-group-item list-group-item-action p-3 mb-2 shadow-sm" 
-            style="border-radius: 10px; transition: transform 0.2s ease, box-shadow 0.2s ease; border: {% if request.GET.job|add:'0' == job.id %} 2px solid #007bff {% else %} 1px solid black {% endif %}; background: #ffffff;"
+            style="border-radius: 10px; transition: transform 0.2s ease, box-shadow 0.2s ease; border: {% if request.GET.job|add:'0' == job.id %} 2px solid rgb(0, 145, 255) {% else %} 1px solid grey {% endif %}; background: #ffffff;"
             onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 6px 20px -5px rgb(0 0 0 / 0.5)'"
             onmouseout="this.style.transform='none';this.style.boxShadow=''" 
           >
@@ -121,7 +121,7 @@
       {% if request.GET.job %}
         {% for job in page_obj %}
           {% if job.id == request.GET.job|add:'0' %}
-            <div class="card p-4 shadow position-relative">
+            <div class="card p-4 position-relative">
               <div class="position-absolute top-0 end-0 p-3 d-flex align-items-center gap-2">
                 {% if job.id in saved_job_ids %}
                   <a href="{% url 'unsave-job' job.id %}?search={{ search|urlencode }}&location={{ location|urlencode }}&job={{ job.id }}&page={{ page_obj.number }}"  title="Unsave"><i class="bi bi-bookmark-fill fs-4 text-warning"></i></a>
@@ -178,16 +178,41 @@
                 </span>
               {% else %}
                 <a 
-                  href="{% url 'apply-job' job.id %}" 
+                  data-bs-toggle="modal" 
+                  data-bs-target="#applyJob{{ job.id }}"
                   class="btn btn-primary mt-3">
                   Apply now
                 </a>
+
+                <!-- Apply Modal -->
+                <div class="modal fade" id="applyJob{{ job.id }}" tabindex="-1" aria-labelledby="applyJob{{ job.id }}" aria-hidden="true">
+                  <div class="modal-dialog modal-md">
+                    <div class="modal-content p-4">
+                      <div class="modal-header">
+                        <h5 class="modal-title" id="applyJob{{ job.id }}">Apply to {{ job.title }}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                      </div>
+                      <div class="modal-body">
+                        <form action="{% url 'apply-job' job.id %}?search={{ search|urlencode }}&location={{ location|urlencode }}&job={{ job.id }}{% if page_obj.number %}&page={{ page_obj.number }}{% endif %}" method="POST">
+                          {% csrf_token %}
+                          <div class="mb-3">
+                           <label for="cover-letter-{{ job.id }}">Cover Letter</label>
+                            <textarea name="cover_letter" id="cover-letter-{{ job.id }}" class="form-control" required></textarea>
+                          </div>
+                          <button type="submit" class="btn btn-primary w-100">
+                            Apply Now
+                          </button>
+                        </form>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               {% endif %}
             </div>
           {% endif %}
         {% endfor %}
       {% else %}
-        <div class="card p-4 shadow">
+        <div class="card p-4">
           <p>Select a job from the left to view details</p>
         </div>
       {% endif %}

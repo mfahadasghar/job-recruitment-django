@@ -26,10 +26,10 @@
 
   <h5 class="card-title mb-3">{{ item.job.title }}</h5>
   <p class="card-text mb-2"><i class="bi bi-geo-alt-fill me-1"></i>{{ item.job.location }}</p>
-  <div class="mb-3">
-    <span class="badge bg-primary">{{ item.applicant_count }} Applications</span>
-    <span class="badge bg-primary">{{ item.job.salary_min|floatformat:0 }} - {{ item.job.salary_max|floatformat:0 }} PKR</span>
-    <span class="badge bg-primary">
+  <div class="mb-2">
+    <span class="badge bg-secondary p-2">{{ item.applicant_count }} Applications</span>
+    <span class="badge bg-secondary p-2">{{ item.job.salary_min|floatformat:0 }} - {{ item.job.salary_max|floatformat:0 }} PKR</span>
+    <span class="badge bg-secondary p-2">
       {% if item.job.job_type == 'full' %}Full-time{% elif item.job.job_type == 'remote' %}Remote{% endif %}
     </span>
   </div>

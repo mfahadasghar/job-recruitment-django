@@ -101,14 +101,22 @@ class ApplicationAnswer(models.Model):
     answer = models.TextField()
 
 class Interview(models.Model):
-    application = models.OneToOneField(Application, on_delete=models.CASCADE)
-    date_time = models.DateTimeField()
-    mode = models.CharField(max_length=10, choices=[('online', 'Online'), ('onsite', 'On-site')])
-    link_or_location = models.CharField(max_length=255)
+    application = models.ForeignKey(Application, on_delete=models.CASCADE, related_name='interviews')
+    scheduled_at = models.DateTimeField()
+    location = models.TextField(blank=True, null=True)  # for in-person or Zoom link
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Interview for {self.application.job.title} with {self.application.user.username}"
 
 class InterviewFeedback(models.Model):
-    interview = models.OneToOneField(Interview, on_delete=models.CASCADE)
+    interview = models.OneToOneField(Interview, on_delete=models.CASCADE, related_name='feedback')
     feedback = models.TextField()
+    rated = models.IntegerField(blank=True, null=True)  # Rating 1-10
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Feedback for {self.interview}"
     
 class SubscriptionPlan(models.Model):
     name = models.CharField(max_length=50)

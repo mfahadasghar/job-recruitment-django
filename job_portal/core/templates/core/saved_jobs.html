@@ -4,7 +4,7 @@
 
 {% block content %}
 <div class="container p-4">
-  <h2 class="text-center mb-4">Your Saved Jobs</h2>
+  <h3 class="text-center mb-4">Your Saved Jobs</h3>
 
   {% if not saved_jobs %}
     <div class="alert alert-warning mt-4">
@@ -26,7 +26,7 @@
             </div>
             <small>Posted {{ item.job.created_at|timesince }} ago</small>
             <a 
-              href="{% url 'job-list' %}?job={{ item.job.id }}"
+              href="{% url 'job-detail' item.job.id %}"
               class="btn btn-primary mt-3">
               View Job
             </a>

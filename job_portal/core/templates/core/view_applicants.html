@@ -66,19 +66,19 @@
           {% for app in applications %}
             {% if app.id == request.GET.selected|add:'0' %}
               <div>
-                <div class="d-flex justify-content-between align-items-start mb-3">
+                <div class="d-flex justify-content-between align-items-start">
                    <div>
                      <h5>{{ app.seeker.user.username|capfirst }}</h5>
-                     <p>Location: {{ app.seeker.location|default:'-' }}</p>
+                     <p>Location: {{ app.seeker.location|default:'N/A' }}</p>
                      <p>Skills: 
                          {% for skill in app.seeker.skills.all %}
-                           <span class="badge bg-secondary">{{ skill.name }}</span>
+                           <span class="badge bg-secondary p-2">{{ skill.name|capfirst }}</span>
                          {% empty %}
                            <span>-</span>
                          {% endfor %}
                       </p>
                    </div>
-                   <span class="badge 
+                   <span class="badge p-2
                      {% if app.status == 'applied' %}bg-warning{% endif %}
                      {% if app.status == 'interview' %}bg-info{% endif %}
                      {% if app.status == 'rejected' %}bg-danger{% endif %}
@@ -87,23 +87,56 @@
                    </span>
                  </div>
 
-                 <div class="mb-3">
+                 <div class="mb-2">
                    <a 
                      href="{{ app.resume.url }}"
                      target="_blank"
-                     class="btn btn-outline-primary me-2">
+                     class="btn btn-outline-dark">
                      View Resume
                    </a>
+                    <button 
+                     class="btn btn-outline-dark" 
+                     data-bs-toggle="modal" 
+                     data-bs-target="#scheduleInterview{{ app.seeker.user.id }}">Schedule Interview</button>
                    <a 
                      href="{% url 'inbox' %}?thread={{ app.seeker.user.id }}"
-                     class="btn btn-outline-info">
-                     <i class="bi bi-chat-fill me-1"></i>Message Applicant
-                   </a>
+                     class="btn btn-outline-dark">
+                     <i class="bi bi-chat-fill"></i></a>
+
+                  
+
+                   <!-- Modal -->
+                   <div class="modal fade" id="scheduleInterview{{ app.seeker.user.id }}" tabindex="-1" aria-labelledby="scheduleInterview{{ app.seeker.user.id }}" aria-hidden="true">
+                     <div class="modal-dialog modal-md">
+                       <div class="modal-content p-4">
+                         <div class="modal-header">
+                           <h5 class="modal-title" id="scheduleInterview{{ app.seeker.user.id }}">Schedule Interview for {{ app.seeker.user.username|capfirst }}</h5>
+                           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                         </div>
+                         <div class="modal-body">
+                           <form method="POST" action="{% url 'schedule_interview' app.seeker.user.id %}">
+                             {% csrf_token %}
+                             <div class="mb-3">
+                               <label>Date and Time</label>
+                               <input name="scheduled_at" type="datetime-local" class="form-control" required>
+                             </div>
+                             <div class="mb-3">
+                               <label>Location or Zoom Link</label>
+                               <input name="location" type="text" class="form-control">
+                             </div>
+                             <button type="submit" class="btn btn-primary w-100">
+                               Schedule
+                             </button>
+                           </form>
+                         </div>
+                       </div>
+                     </div>
+                   </div>
                  </div>
 
-                 <form method="POST" action="{% url 'update-applicant-status' app.id %}" class="input-group mt-3 mb-4">
+                 <form method="POST" action="{% url 'update-applicant-status' app.id %}" class="input-group mt-2 mb-3">
                    {% csrf_token %}
-                   <select name="status" class="form-select">
+                   <select name="status" class="form-select" style="border: 1px solid black; border-radius: 5px 0px 0px 5px">
                      <option value="applied" {% if app.status == 'applied' %}selected{% endif %}>
                        Applied
                      </option>
@@ -117,7 +150,7 @@
                        Hired
                      </option>
                    </select>
-                   <button class="btn btn-outline-success" type="submit">
+                   <button class="btn btn-outline-dark" type="submit">
                      Update
                    </button>
                  </form>

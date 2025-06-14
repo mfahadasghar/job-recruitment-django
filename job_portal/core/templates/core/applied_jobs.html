@@ -4,7 +4,7 @@
 
 {% block content %}
 <div class="container p-4">
-  <h2 class="text-center mb-4">Jobs You've Applied To</h2>
+  <h3 class="text-center mb-4">Jobs You've Applied To</h3>
 
   {% if not applications %}
     <div class="alert alert-warning mt-4">
@@ -25,7 +25,7 @@
             </div>
             <small>Applied {{ application.applied_at|timesince }} ago</small>
             <a 
-              href="{% url 'job-list' %}?job={{ application.job.id }}"
+              href="{% url 'job-detail' application.job.id %}"
               class="btn btn-primary mt-3">
               View Job
             </a>

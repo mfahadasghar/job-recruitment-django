@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 {% block content %}
-<h4>Payment History</h4>
+<div class="container mt-4 mb-4">
+  <h3 class="mb-4 text-center">Payment History</h3>
 <ul class="list-group mt-3">
   {% for payment in payments %}
     <li class="list-group-item">
@@ -10,4 +11,5 @@
     <li class="list-group-item">No payments made yet.</li>
   {% endfor %}
 </ul>
+</div>
 {% endblock %}

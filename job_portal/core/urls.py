@@ -42,4 +42,5 @@ urlpatterns = [
     path('seeker/applied/', applied_jobs_page, name='applied-jobs'),
     path('inbox/', inbox, name='inbox'),
     path('thread/<int:recipient_id>/', thread, name='thread'),
+    path('schedule_interview/<int:application_id>/', schedule_interview, name='schedule_interview'),
 ]

@@ -656,3 +656,22 @@ def thread(request, recipient_id):
     }
     return render(request, 'core/thread.html', context)
 
+
+def schedule_interview(request, application_id):
+    application = get_object_or_404(Application, id=application_id, job__employer__user=request.user)
+
+    if request.method == "POST":
+        scheduled_at = request.POST['scheduled_at']  # ISO format or "2025-06-14T15:30"
+        location = request.POST['location']
+
+        interview = Interview.objects.create(
+            application=application,
+            scheduled_at=datetime.fromisoformat(scheduled_at),
+            location=location
+        )
+        messages.success(request, "Interview successfully scheduled.")
+        return redirect('view-applicants', application.job.id)
+
+    return render(request, 'core/schedule_interview.html', {
+        'application': application
+    })

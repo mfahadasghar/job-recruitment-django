@@ -36,7 +36,7 @@
 
 
 <div class="container p-4">
-  {% if not jobs %}
+  {% if not page_obj %}
           <div class="alert alert-warning mt-4">
             No Jobs Found.
           </div>
@@ -46,9 +46,9 @@
     <!-- Left side: Job List -->
     <div class="col-md-4">
       <div class="list-group">
-        {% for job in jobs %}
+        {% for job in page_obj %}
           <a 
-            href="?job={{ job.id }}"
+            href="?job={{ job.id }}{% if search %}&search={{ search|urlencode }}{% endif %}{% if location %}&location={{ location|urlencode }}{% endif %}{% if page_obj.number %}&page={{ page_obj.number }}{% endif %}"
             class="list-group-item list-group-item-action p-3 mb-2 shadow-sm" 
             style="border-radius: 10px; transition: transform 0.2s ease, box-shadow 0.2s ease; border: {% if request.GET.job|add:'0' == job.id %} 2px solid #007bff {% else %} 1px solid black {% endif %}; background: #ffffff;"
             onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 6px 20px -5px rgb(0 0 0 / 0.5)'"
@@ -60,7 +60,7 @@
                   {% if job.is_urgent %}
                     <span class="badge bg-danger ms-2">Urgent</span>
                   {% endif %}
-                  {% if job.created_at|timesince > '7 days' %}
+                  {% if job.created_at|timesince < '7 days' %}
                     <span class="badge bg-warning text-dark ms-2">New</span>
                   {% endif %}
                   {% if job.id in applied_ids %}
@@ -83,19 +83,50 @@
           </a>
         {% endfor %}
       </div>
+
+      <nav aria-label="Page navigation">
+  <ul class="pagination justify-content-center">
+    {% if page_obj.has_previous %}
+      <li class="page-item">
+        <a class="page-link" 
+          href="?page={{ page_obj.previous_page_number }}{% if search %}&search={{ search|urlencode }}{% endif %}{% if location %}&location={{ location|urlencode }}{% endif %}">
+          Previous
+        </a>
+      </li>
+    {% endif %}
+
+    {% for num in page_obj.paginator.page_range %}
+      <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+        <a class="page-link" 
+          href="?page={{ num }}{% if search %}&search={{ search|urlencode }}{% endif %}{% if location %}&location={{ location|urlencode }}{% endif %}">
+          {{ num }}
+        </a>
+      </li>
+    {% endfor %}
+
+    {% if page_obj.has_next %}
+      <li class="page-item">
+        <a class="page-link" 
+          href="?page={{ page_obj.next_page_number }}{% if search %}&search={{ search|urlencode }}{% endif %}{% if location %}&location={{ location|urlencode }}{% endif %}">
+          Next
+        </a>
+      </li>
+    {% endif %}
+  </ul>
+</nav>
     </div>
 
     <!-- Right side: Job Detail -->
     <div class="col-md-8">
       {% if request.GET.job %}
-        {% for job in jobs %}
+        {% for job in page_obj %}
           {% if job.id == request.GET.job|add:'0' %}
             <div class="card p-4 shadow position-relative">
               <div class="position-absolute top-0 end-0 p-3 d-flex align-items-center gap-2">
                 {% if job.id in saved_job_ids %}
-                  <a href="{% url 'unsave-job' job.id %}?search={{ request.GET.search|urlencode }}&location={{ request.GET.location|urlencode }}&job={{ job.id }}" title="Unsave"><i class="bi bi-bookmark-fill fs-4 text-warning"></i></a>
+                  <a href="{% url 'unsave-job' job.id %}?search={{ search|urlencode }}&location={{ location|urlencode }}&job={{ job.id }}&page={{ page_obj.number }}"  title="Unsave"><i class="bi bi-bookmark-fill fs-4 text-warning"></i></a>
                 {% else %}
-                  <a href="{% url 'save-job' job.id %}?search={{ request.GET.search|urlencode }}&location={{ request.GET.location|urlencode }}&job={{ job.id }}" title="Save"><i class="bi bi-bookmark fs-4 text-muted"></i></a>
+                  <a href="{% url 'save-job' job.id %}?search={{ search|urlencode }}&location={{ location|urlencode }}&job={{ job.id }}&page={{ page_obj.number }}"  title="Save"><i class="bi bi-bookmark fs-4 text-muted"></i></a>
                 {% endif %}
                 
                 <a href="#" data-bs-toggle="modal" data-bs-target="#reportJob{{ job.id }}" title="Report Job">

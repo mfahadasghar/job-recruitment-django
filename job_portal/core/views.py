@@ -175,18 +175,15 @@ def delete_job(request, job_id):
         return redirect('my-jobs')
     
     return render(request, 'core/delete_job.html', {'job': job})
-
-@login_required
-def job_list(request):
-    jobs = Job.objects.filter(is_active=True).order_by('-created_at')
-    search = request.GET.get('search')
-    location = request.GET.get('location')
     
-    if search and location:
-        jobs = jobs.filter(Q(title__icontains=search) & Q(location__icontains=location))
-    elif search:
+def job_list(request):
+    search = request.GET.get('search', '')
+    location = request.GET.get('location', '')
+
+    jobs = Job.objects.all()
+    if search:
         jobs = jobs.filter(title__icontains=search)
-    elif location:
+    if location:
         jobs = jobs.filter(location__icontains=location)
 
     applied_ids = set()
@@ -196,15 +193,20 @@ def job_list(request):
         seeker = request.user.jobseekerprofile
         applied_ids = set(Application.objects.filter(seeker=seeker).values_list('job_id', flat=True))
         saved_job_ids = set(SavedJob.objects.filter(seeker=seeker).values_list('job_id', flat=True))
+        
+    paginator = Paginator(jobs, 5)  # 10 jobs per page
+    page = request.GET.get('page')
+    page_obj = paginator.get_page(page)
 
-    return render(request, 'core/job_list.html', {
-        'jobs': jobs,
-        'applied_ids': applied_ids,
-        'saved_job_ids': saved_job_ids,
+    context = {
+        'page_obj': page_obj,
         'search': search,
-        'location': location
-    })
-    
+        'location': location,
+        'applied_ids': applied_ids,  # previously defined
+        'saved_job_ids': saved_job_ids,  # previously defined
+    }
+    return render(request, 'core/job_list.html', context)
+
 @login_required
 def apply_job(request, job_id):
     if request.user.role != 'seeker':
@@ -432,8 +434,9 @@ def save_job(request, job_id):
     search = request.GET.get('search', '')
     location = request.GET.get('location', '')
     selected = request.GET.get('job', '')
+    page_num = request.GET.get('page', '')
 
-    return redirect(f"{reverse('job-list')}?search={search}&location={location}&job={selected}")
+    return redirect(f"{reverse('job-list')}?search={search}&location={location}&job={selected}&page={page_num}")
 
 
 @login_required
@@ -447,8 +450,9 @@ def unsave_job(request, job_id):
     search = request.GET.get('search', '')
     location = request.GET.get('location', '')
     selected = request.GET.get('job', '')
+    page_num = request.GET.get('page', '')
 
-    return redirect(f"{reverse('job-list')}?search={search}&location={location}&job={selected}")
+    return redirect(f"{reverse('job-list')}?search={search}&location={location}&job={selected}&page={page_num}")
 
 
 @login_required

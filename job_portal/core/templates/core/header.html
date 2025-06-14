@@ -2,10 +2,10 @@
   <div class="container-fluid">
     <a class="navbar-brand" href="/">Job Portal</a>
     <div class="collapse navbar-collapse">      
-      {% if user.is_authenticated == false %}
+      {% if not user.is_authenticated %}
       <ul class="navbar-nav ms-left">
-            <li class="nav-item"><a class="nav-link" href="{% url 'seeker-dashboard' %}">Home</a></li>
-            <li class="nav-item"><a class="nav-link" href="{% url 'seeker-dashboard' %}">Company Reviews</a></li>
+            <li class="nav-item"><a class="nav-link" href="">Home</a></li>
+            <li class="nav-item"><a class="nav-link" href="">Company Reviews</a></li>
       </ul>
       {% endif %}
 

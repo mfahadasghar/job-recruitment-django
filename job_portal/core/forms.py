@@ -15,16 +15,19 @@ class UserLoginForm(AuthenticationForm):
 class JobSeekerProfileForm(forms.ModelForm):
     skill_input = forms.CharField(
         required=False,
-        widget=forms.TextInput(attrs={
-            'class': 'form-control',
-            'placeholder': 'Enter skills like: Python, React, SQL'
-        }),
-        label='Your Skills'
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter skills like: Python, React, SQL'})
     )
 
     class Meta:
         model = JobSeekerProfile
-        fields = ['phone', 'location', 'resume', 'bio', 'skill_input']
+        fields = ['phone', 'location', 'resume', 'bio']
+
+        widgets = {
+            'phone': forms.TextInput(attrs={'class': 'form-control'}),
+            'location': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            'resume': forms.ClearableFileInput(attrs={'class': 'form-control'}),
+            'bio': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+        }
 
     def __init__(self, *args, **kwargs):
         super(JobSeekerProfileForm, self).__init__(*args, **kwargs)
@@ -132,4 +135,13 @@ class JobReportForm(forms.ModelForm):
         fields = ['reason']
         widgets = {
             'reason': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Describe the issue...'}),
+        }
+        
+class MessageForm(forms.ModelForm):
+    class Meta:
+        model = Message
+        fields = ['content']
+
+        widgets = {
+            'content': forms.Textarea(attrs={'rows': 2, 'class': 'form-control'})
         }

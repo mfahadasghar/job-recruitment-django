@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block title %}Applied Jobs{% endblock %}
+
+{% block content %}
+<div class="container p-4">
+  <h2 class="text-center mb-4">Jobs You've Applied To</h2>
+
+  {% if not applications %}
+    <div class="alert alert-warning mt-4">
+      You haven't applied to any jobs yet.
+    </div>
+  {% else %}
+    <div class="row g-4">
+      {% for application in applications %}
+        <div class="col-md-4">
+          <div class="card p-3 shadow-sm" style="border-radius: 10px">
+            <h5>{{ application.job.title }}</h5>
+            <p>{{ application.job.company.name }}</p>
+            <span>{{ application.job.location }}</span>
+            <div class="mb-3">
+              <span class="badge {% if application.status == 'accepted' %}bg-success{% elif application.status == 'rejected' %}bg-danger{% else %}bg-warning{% endif %}">
+                {{ application.status|capfirst }}
+              </span>
+            </div>
+            <small>Applied {{ application.applied_at|timesince }} ago</small>
+            <a 
+              href="{% url 'job-list' %}?job={{ application.job.id }}"
+              class="btn btn-primary mt-3">
+              View Job
+            </a>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

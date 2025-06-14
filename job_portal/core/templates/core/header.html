@@ -1,13 +1,23 @@
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-  <div class="container">
+  <div class="container-fluid">
     <a class="navbar-brand" href="/">Job Portal</a>
-    <div class="collapse navbar-collapse">
+    <div class="collapse navbar-collapse">      
+      {% if user.is_authenticated == false %}
+      <ul class="navbar-nav ms-left">
+            <li class="nav-item"><a class="nav-link" href="{% url 'seeker-dashboard' %}">Home</a></li>
+            <li class="nav-item"><a class="nav-link" href="{% url 'seeker-dashboard' %}">Company Reviews</a></li>
+      </ul>
+      {% endif %}
+
       <ul class="navbar-nav ms-auto">
         {% if user.is_authenticated %}
           {% if user.role == 'seeker' %}
-            <li class="nav-item"><a class="nav-link" href="{% url 'seeker-dashboard' %}">Dashboard</a></li>
-            <li class="nav-item"><a class="nav-link" href="{% url 'seeker-profile' %}">Profile</a></li>
-            <li class="nav-item"><a class="nav-link" href="{% url 'job-list' %}">Browse Jobs</a></li>
+          <li class="nav-item"><a class="nav-link" href="{% url 'job-list' %}">Browse Jobs</a></li>
+          <li class="nav-item"><a class="nav-link" href="{% url 'saved-jobs' %}">Saved Jobs</a></li>
+          <li class="nav-item"><a class="nav-link" href="{% url 'applied-jobs' %}">Applied Jobs</a></li>
+          <li class="nav-item"><a class="nav-link" href="{% url 'inbox' %}">Inbox</a></li>
+          <li class="nav-item"><a class="nav-link" href="{% url 'seeker-profile' %}">Profile</a></li>
+            
           {% elif user.role == 'employer' %}
             <li class="nav-item"><a class="nav-link" href="{% url 'employer-dashboard' %}">Dashboard</a></li>
             <li class="nav-item"><a class="nav-link" href="{% url 'employer-profile' %}">Profile</a></li>

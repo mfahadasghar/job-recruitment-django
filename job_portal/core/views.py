@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.urls import reverse
 from .forms import *
 from django.contrib.auth.views import LoginView,LogoutView
 from django.contrib.auth.decorators import login_required
@@ -7,6 +8,7 @@ from django.contrib.auth import login
 from .models import *
 from django.db.models import Q
 from django.views.decorators.http import require_POST
+from datetime import datetime
 
 def register(request):
     if request.method == 'POST':
@@ -15,6 +17,13 @@ def register(request):
             user = form.save()
             login(request, user)
             messages.success(request, 'Registration successful!')
+
+            if user.role == 'seeker':
+                JobSeekerProfile.objects.create(user=user)
+                return redirect('job-list')
+            elif user.role == 'employer':
+                EmployerProfile.objects.create(user=user)
+                return redirect('employer-dashboard')
             return redirect('dashboard')
     else:
         form = UserRegisterForm()
@@ -28,6 +37,16 @@ class CustomLoginView(LoginView):
     def form_valid(self, form):
         messages.success(self.request, 'Login successful!')
         return super().form_valid(form)
+
+    def get_success_url(self):
+        if self.request.user.role == 'seeker':
+            from django.urls import reverse
+            return reverse('job-list')
+        elif self.request.user.role == 'employer':
+            from django.urls import reverse
+            return reverse('employer-dashboard')
+        from django.urls import reverse
+        return reverse('dashboard')
     
 class CustomLogoutView(LogoutView):
     def dispatch(self, request, *args, **kwargs):
@@ -38,7 +57,7 @@ class CustomLogoutView(LogoutView):
 @login_required
 def dashboard(request):
     if request.user.role == 'seeker':
-        return redirect('seeker-dashboard')
+        return redirect('job-list')
     elif request.user.role == 'employer':
         return redirect('employer-dashboard')
     else:
@@ -159,9 +178,15 @@ def delete_job(request, job_id):
 @login_required
 def job_list(request):
     jobs = Job.objects.filter(is_active=True).order_by('-created_at')
-    query = request.GET.get('q')
-    if query:
-        jobs = jobs.filter(title__icontains=query)
+    search = request.GET.get('search')
+    location = request.GET.get('location')
+    
+    if search and location:
+        jobs = jobs.filter(Q(title__icontains=search) & Q(location__icontains=location))
+    elif search:
+        jobs = jobs.filter(title__icontains=search)
+    elif location:
+        jobs = jobs.filter(location__icontains=location)
 
     applied_ids = set()
     saved_job_ids = set()
@@ -175,7 +200,8 @@ def job_list(request):
         'jobs': jobs,
         'applied_ids': applied_ids,
         'saved_job_ids': saved_job_ids,
-        'query': query,
+        'search': search,
+        'location': location
     })
     
 @login_required
@@ -204,36 +230,6 @@ def apply_job(request, job_id):
 
     return render(request, 'core/apply_job.html', {'job': job})
 
-
-@login_required
-def seeker_dashboard(request):
-    if request.user.role != 'seeker':
-        return redirect('dashboard')
-
-    seeker = request.user.jobseekerprofile
-    seeker_skills = set(seeker.skills.values_list('name', flat=True))
-    jobs = Job.objects.filter(is_active=True).order_by('-created_at')
-
-    applied_ids = set(Application.objects.filter(seeker=seeker).values_list('job_id', flat=True))
-    saved_jobs = SavedJob.objects.filter(seeker=seeker).select_related('job')
-    saved_job_ids = set(saved_jobs.values_list('job__id', flat=True))  # ✅ prepare for template
-
-    # Build recommended
-    recommended = []
-    for job in jobs:
-        job_skills = set(map(str.strip, job.skills_required.lower().split(',')))
-        matched = seeker_skills.intersection(job_skills)
-        score = round((len(matched) / len(job_skills) * 100), 1) if job_skills else 0
-        if score > 0:
-            recommended.append((job, score))
-
-    return render(request, 'core/seeker_dashboard.html', {
-    'recommended_jobs': recommended[:5],
-    'all_jobs': jobs[:5],
-    'applied_ids': applied_ids,
-    'saved_jobs': saved_jobs,
-    'saved_job_ids': saved_job_ids,  # ✅ added
-    })
 
 @login_required
 def employer_dashboard(request):
@@ -424,10 +420,13 @@ def save_job(request, job_id):
     seeker = request.user.jobseekerprofile
     job = get_object_or_404(Job, id=job_id)
 
-    # Prevent duplicates
     SavedJob.objects.get_or_create(seeker=seeker, job=job)
     messages.success(request, "Job saved.")
-    return redirect('job-list')
+    search = request.GET.get('search', '')
+    location = request.GET.get('location', '')
+    selected = request.GET.get('job', '')
+
+    return redirect(f"{reverse('job-list')}?search={search}&location={location}&job={selected}")
 
 
 @login_required
@@ -437,8 +436,12 @@ def unsave_job(request, job_id):
 
     seeker = request.user.jobseekerprofile
     SavedJob.objects.filter(seeker=seeker, job_id=job_id).delete()
-    messages.success(request, "Job removed from saved list.")
-    return redirect('seeker-dashboard')  # or 'job-list'
+    messages.success(request, "Job removed from saved.")
+    search = request.GET.get('search', '')
+    location = request.GET.get('location', '')
+    selected = request.GET.get('job', '')
+
+    return redirect(f"{reverse('job-list')}?search={search}&location={location}&job={selected}")
 
 
 @login_required
@@ -531,4 +534,105 @@ def view_reports(request):
 
 
 def landing_page(request):
-    return render(request, 'core/landing.html')
+    if request.user.is_authenticated:
+        if request.user.role == 'seeker':
+            return redirect('job-list')
+        elif request.user.role == 'employer':
+            return redirect('employer-dashboard')
+    else:
+        return render(request, 'core/landing.html')
+    
+    
+@login_required
+def saved_jobs_page(request):
+    if request.user.role != 'seeker':
+        messages.error(request, "Not authorized.")
+        return redirect('dashboard')
+
+    seeker = request.user.jobseekerprofile
+    saved_jobs = SavedJob.objects.filter(seeker=seeker).select_related('job')
+
+    return render(request, 'core/saved_jobs.html', {
+        'saved_jobs': saved_jobs
+    })
+    
+@login_required
+def applied_jobs_page(request):
+    if request.user.role != 'seeker':
+        messages.error(request, "Not authorized.")
+        return redirect('dashboard')
+
+    seeker = request.user.jobseekerprofile
+    applications = Application.objects.filter(seeker=seeker).select_related('job')
+
+    return render(request, 'core/applied_jobs.html', {
+        'applications': applications
+    })
+    
+@login_required
+def inbox(request):
+    """Show all conversations for the current user with last message and unread count."""
+    messages_qs = Message.objects.filter(
+        Q(sender=request.user) | Q(recipient=request.user)
+    ).order_by('-timestamp')
+
+    conversations = []
+    counterpart_ids = set()
+
+    for message in messages_qs:
+        counterpart = message.sender if message.sender != request.user else message.recipient
+        if counterpart.id not in counterpart_ids:
+            unread_count = Message.objects.filter(
+                sender=counterpart, recipient=request.user, is_read=False
+            ).count()
+            conversations.append((counterpart, message, unread_count))
+            counterpart_ids.add(counterpart.id)
+
+    thread_recipient = None
+    messages = []
+    thread_recipient_id = None
+
+    thread = request.GET.get('thread')
+    if thread and thread.isdigit():
+        thread_recipient = User.objects.get(id=int(thread))
+        thread_recipient_id = int(thread)
+
+        messages = Message.objects.filter(
+            Q(sender=request.user, recipient=thread_recipient) | Q(sender=thread_recipient, recipient=request.user)
+        ).order_by('timestamp')
+
+        messages.update(is_read=True)  # marking messages as read when opening thread
+
+    context = {
+        'conversations': conversations,
+        'thread_recipient': thread_recipient,
+        'thread_recipient_id': thread_recipient_id,
+        'messages': messages,
+    }
+    return render(request, 'core/inbox.html', context)
+
+@login_required
+def thread(request, recipient_id):
+    recipient = User.objects.get(id=recipient_id)
+    messages = Message.objects.filter(
+        Q(sender=request.user, recipient=recipient) | Q(sender=recipient, recipient=request.user)
+    ).order_by('timestamp')
+
+    if request.method == "POST":
+        form = MessageForm(request.POST)
+        if form.is_valid():
+            message = form.save(commit=False)
+            message.sender = request.user
+            message.recipient = recipient
+            message.timestamp = datetime.now()
+            message.save()
+            return redirect(f"{reverse('inbox')}?thread={recipient.id}")
+    else:
+        form = MessageForm()
+
+    context = {
+        "messages": messages,
+        "form": form,
+        "recipient": recipient,
+    }
+    return render(request, 'core/thread.html', context)

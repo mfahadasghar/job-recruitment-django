@@ -15,7 +15,6 @@ urlpatterns = [
     path('employer/jobs/<int:job_id>/delete/', delete_job, name='delete-job'),
     path('jobs/', job_list, name='job-list'),
     path('jobs/<int:job_id>/apply/', apply_job, name='apply-job'),
-    path('seeker/dashboard/', seeker_dashboard, name='seeker-dashboard'),
     path('employer/dashboard/', employer_dashboard, name='employer-dashboard'),
     path('employer/job/<int:job_id>/applicants/', view_applicants, name='view-applicants'),
     path('employer/applicant/<int:application_id>/update/', update_applicant_status, name='update-applicant-status'),
@@ -39,4 +38,8 @@ urlpatterns = [
     path('jobs/<int:job_id>/report/', report_job, name='report-job'),
     path('jobs/<int:job_id>/', job_detail, name='job-detail'),
     path('reports/', view_reports, name='view-reports'),
+    path('seeker/saved/', saved_jobs_page, name='saved-jobs'),
+    path('seeker/applied/', applied_jobs_page, name='applied-jobs'),
+    path('inbox/', inbox, name='inbox'),
+    path('thread/<int:recipient_id>/', thread, name='thread'),
 ]

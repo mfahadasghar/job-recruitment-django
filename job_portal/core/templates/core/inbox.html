@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+{% block title %}Inbox{% endblock %}
+{% block content %}
+
+<div class="container mt-4">
+  <div class="row g-0 border p-0" style="border-radius: 10px; overflow: hidden">
+    <!-- Left side: conversations -->
+    <div class="col-md-4 p-0 border-end" style="height: 80vh; overflow-y: scroll; background: #f5f5f5">
+      <ul class="list-group list-group-flush">
+        {% for counterpart, last_message, unread_count in conversations %}
+          <a 
+            href="?thread={{ counterpart.id }}"
+            class="list-group-item d-flex align-items-center p-3 {% if counterpart.id == thread_recipient_id %}active{% endif %}" 
+            style="border-bottom: 1px solid #eee">
+            <div class="flex-shrink-0 me-3">
+              <div class="rounded-circle bg-warning text-center text-light p-2" 
+                   style="width: 50px;height: 50px;font-size: 24px">
+                   {{ counterpart.username|first|upper }}
+              </div>
+            </div>
+            <div class="flex-grow-1">
+              <strong>{{ counterpart.username }}</strong>
+              <br>
+              <small>{{ last_message.content|truncatewords:10 }}</small>
+            </div>
+            {% if unread_count > 0 %}
+              <span class="badge bg-primary rounded-pill">{{ unread_count }}</span>
+            {% endif %}
+          </a>
+        {% empty %}
+          <div class="p-3 text-muted">
+            No conversations
+          </div>
+        {% endfor %}
+      </ul>
+    </div>
+
+    <!-- Right side: messages -->
+   <div class="col-md-8 p-4 d-flex flex-column" style="height: 80vh; background: #ffffff">
+  {% if thread_recipient %}
+    <!-- Header sticks at the top -->
+    <div class="flex-shrink-0 mb-4">
+      <h5>Chat with <strong>{{ thread_recipient.username }}</strong></h5>
+    </div>
+
+    <!-- Scrollable messages -->
+    <div class="flex-grow-1 d-flex flex-column" style="overflow-y: scroll">
+      {% for message in messages %}
+        <div class="p-2 mb-2 align-self-{% if message.sender == request.user %}end{% else %}start{% endif %}" 
+             style="max-width: 60%;
+                     border-radius: 15px;
+                     background: {% if message.sender == request.user %}#edf5ff{% else %}#f5f5f5{% endif %};">
+          <p class="mb-1">{{ message.content }}</p>
+          <small>{{ message.timestamp|date:'Y-m-d H:i' }}</small>
+        </div>
+      {% endfor %}
+    </div>
+
+    <!-- Input anchored at bottom -->
+    <div class="flex-shrink-0 mt-4">
+      <form method="POST" action="{% url 'thread' thread_recipient.id %}" 
+            class="input-group" style="width: 100%">
+        {% csrf_token %}
+        <input name="content" 
+               id="message" 
+               class="form-control p-3 me-2" 
+               style="border-radius: 10px;" 
+               placeholder="Type a message…" 
+               required>
+        <button type="submit" class="btn btn-primary p-3" style="border-radius: 10px">
+          Send
+        </button>
+      </form>
+    </div>
+  {% else %}
+    <div class="p-3 text-muted">
+      Select a conversation from the left to view messages.
+    </div>
+  {% endif %}
+</div>
+  </div>
+</div>
+
+{% endblock %}

@@ -3,23 +3,43 @@
 {% block title %}Login{% endblock %}
 
 {% block content %}
-<div class="row justify-content-center">
-  <div class="col-md-6">
-    <div class="card shadow p-4">
-      <h3 class="text-center mb-4">Login</h3>
-      <form method="POST">
-        {% csrf_token %}
-        {% for field in form %}
-          <div class="mb-3">
-            <label class="form-label">{{ field.label }}</label>
-            {{ field }}
-            {% if field.errors %}
-              <div class="text-danger small">{{ field.errors.0 }}</div>
-            {% endif %}
-          </div>
-        {% endfor %}
-        <button type="submit" class="btn btn-primary w-100">Login</button>
-      </form>
+<div class="container d-flex align-items-center justify-content-center" style="min-height: 80vh">
+  <div class="card p-4 shadow" style="width: 400px; border-radius: 10px">
+    <h2 class="mb-4 text-center">Login</h2>
+
+    <form method="POST">
+      {% csrf_token %}
+      {% for field in form %}
+  <div class="form-group">
+    <input id="{{ field.id_for_label }}"
+       name="{{ field.html_name }}"
+       type="{{ field.field.widget.input_type }}"
+       placeholder="{{ field.label }}"
+       required
+    />
+    <span class="bar"></span>
+    {% for error in field.errors %}
+      <div class="text-danger">{{ error }}</div>
+    {% endfor %}
+  </div>
+{% endfor %}
+      <button class="btn btn-primary w-100 py-2" style="border-radius: 10px">
+        Log in
+      </button>
+    </form>
+
+    <div class="text-center mt-4">
+      <p>Or</p>
+      <a class="btn btn-outline-dark w-100 mb-2" style="border-radius: 10px">
+        <i class="bi bi-google me-2"></i> Continue with Google
+      </a>
+      <a class="btn btn-outline-primary w-100" style="border-radius: 10px">
+        <i class="bi bi-facebook me-2"></i> Continue with Facebook
+      </a>
+    </div>
+
+    <div class="text-center mt-4">
+      <p>Don’t have an account? <a href="{% url 'register' %}">Register here</a></p>
     </div>
   </div>
 </div>

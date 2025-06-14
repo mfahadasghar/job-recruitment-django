@@ -1,33 +1,16 @@
-<footer class="bg-dark text-white mt-auto pt-5">
-  <div class="container">
-    <div class="row text-center text-md-start">
-      <div class="col-md-4 mb-4">
-        <h5>About Job Portal</h5>
-        <p>We connect top talent with top companies. Fast, efficient, and tailored to your career goals or hiring needs.</p>
-      </div>
-      <div class="col-md-4 mb-4">
-        <h5>Quick Links</h5>
-        <ul class="list-unstyled">
-          <li><a href="{% url 'job-list' %}" class="text-white text-decoration-none">Browse Jobs</a></li>
-          <li><a href="{% url 'register' %}" class="text-white text-decoration-none">Register</a></li>
-          <li><a href="{% url 'login' %}" class="text-white text-decoration-none">Login</a></li>
-          <li><a href="{% url 'subscription-plans' %}" class="text-white text-decoration-none">Subscription Plans</a></li>
-        </ul>
-      </div>
-      <div class="col-md-4 mb-4">
-        <h5>Contact Us</h5>
-        <p>Email: support@jobportal.com</p>
-        <p>Phone: +1 (800) 123-4567</p>
-        <div class="mt-2">
-          <a href="https://linkedin.com" class="text-white me-3"><i class="bi bi-linkedin fs-5"></i></a>
-          <a href="https://twitter.com" class="text-white me-3"><i class="bi bi-twitter fs-5"></i></a>
-          <a href="https://github.com" class="text-white"><i class="bi bi-github fs-5"></i></a>
-        </div>
-      </div>
+<footer class="bg-dark text-dark pt-3 pb-4">
+  <div class="container-fluid d-flex justify-content-between align-items-center">
+    <div class="left-links">
+      <a href="/" class ="me-4" >Browse Jobs</a>
+      <a href="/" class ="me-4" >Browse companies</a>
+      <a href="/" class ="me-4" >Countries</a>
+      <a href="/" class ="me-4" >About</a>
+      <a href="/" class ="me-4" >Help</a>
     </div>
-    <hr class="border-light">
-    <div class="text-center pb-3">
-      <small>&copy; 2025 Job Portal. All rights reserved.</small>
+    <div class="right-links">
+      <a href="/" class ="me-4" >© 2025 Job Portal</a>
+      <a href="{% url 'subscription-plans' %}" class ="me-4" >Subscription Plans</a>
+      <a href="/" class ="me-4" >Terms</a>
     </div>
   </div>
 </footer>

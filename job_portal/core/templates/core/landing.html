@@ -1,239 +1,76 @@
 {% extends 'base.html' %}
-{% block title %}Welcome to Job Portal{% endblock %}
-
+{% load static %}
 {% block landing_content %}
 
-<div id="homepageCarousel" class="carousel slide mb-5" data-bs-ride="carousel">
-  <div class="carousel-inner">
-    <div class="carousel-item active">
-      <img src="https://www.recastsoftware.com/wp-content/uploads/2023/02/Banner-Option-1500-x-500-Help-Desk-5-1500x500.png" class="d-block w-100" alt="...">
-      <div class="carousel-caption d-none d-md-block">
-        <div class="py-5 text-center" data-aos="fade-down" data-aos-duration="1000">
-          <h1 class="display-4 fw-bold">Find Your Next Opportunity</h1>
-          <p class="lead">Connecting job seekers with top companies, faster and easier.</p>
-        </div>
-      </div>
-    </div>
-    <div class="carousel-item">
-      <img src="https://sparkplaces.com/wp-content/uploads/2022/12/Private-Office.png" class="d-block w-100" alt="...">
-      <div class="carousel-caption d-none d-md-block">
-        <div class="py-5 text-center" data-aos="fade-down" data-aos-duration="1000">
-          <h1 class="display-4 fw-bold">Find Your Next Opportunity</h1>
-          <p class="lead">Connecting job seekers with top companies, faster and easier.</p>
-        </div>
-      </div>
-    </div>
-    <div class="carousel-item">
-      <img src="https://laborcenter.berkeley.edu/wp-content/uploads/2023/12/Joe-alone-on-the-fifth-floor-1500x500.jpg" class="d-block w-100" alt="...">
-      <div class="carousel-caption d-none d-md-block">
-        <div class="py-5 text-center" data-aos="fade-down" data-aos-duration="1000">
-          <h1 class="display-4 fw-bold">Find Your Next Opportunity</h1>
-          <p class="lead">Connecting job seekers with top companies, faster and easier.</p>
-        </div>
-      </div>
-    </div>
-  <button class="carousel-control-prev" type="button" data-bs-target="#homepageCarousel" data-bs-slide="prev">
-    <span class="carousel-control-prev-icon"></span>
-  </button>
-  <button class="carousel-control-next" type="button" data-bs-target="#homepageCarousel" data-bs-slide="next">
-    <span class="carousel-control-next-icon"></span>
-  </button>
-</div>
+<div class="container-fluid py-5" style="background:rgb(255, 255, 255)">
+  
+  <!-- Search Section -->
+  <div class="container mb-0" style="max-width: 800px;">
+    <form class="input-group p-2 border shadow-lg bg-light rounded align-items-center" style="border-radius: 50px">
+      <span class="input-group-text bg-transparent border-0 ps-4"><i class="bi bi-briefcase-fill text-muted"></i></span>
+      <input 
+        type="text" 
+        name="search" 
+        class="form-control border-0 bg-transparent p-2" 
+        placeholder='Job title, keywords, or company'
+        aria-label='Job title, keywords, or company'
+      >
 
-<hr class="my-5">
+      <span class="input-group-text bg-transparent border-0"><i class="bi bi-geo-alt-fill text-muted"></i></span>
+      <input 
+        type="text" 
+        name="location" 
+        class="form-control border-0 bg-transparent p-2" 
+        placeholder='City, state, or &quot;remote&quot;' 
+        aria-label='Location'
+      >
 
-<!-- 🌟 Feature Highlights (Card-based) -->
-<div class="container my-5" data-aos="fade-up" data-aos-duration="1000">
-  <h2 class="text-center mb-4">Platform Features</h2>
-  <div class="row g-4">
-    <div class="col-md-4">
-      <div class="card shadow-sm h-100">
-        <div class="card-body text-center">
-          <i class="bi bi-briefcase-fill display-5 text-primary mb-3"></i><br>
-          <h5 class="card-title">Easy Job Posting</h5>
-          <p class="card-text">Create and manage job listings quickly with our user-friendly tools.</p>
-        </div>
-      </div>
-    </div>
-    <div class="col-md-4">
-      <div class="card shadow-sm h-100">
-        <div class="card-body text-center">
-          <i class="bi bi-funnel-fill display-5 text-success mb-3"></i><br>
-          <h5 class="card-title">Smart Filters</h5>
-          <p class="card-text">Filter and match jobs based on skills, location, and interests.</p>
-        </div>
-      </div>
-    </div>
-    <div class="col-md-4">
-      <div class="card shadow-sm h-100">
-        <div class="card-body text-center">
-          <i class="bi bi-person-check-fill display-5 text-warning mb-3"></i><br>
-          <h5 class="card-title">Tailored for You</h5>
-          <p class="card-text">Whether a seeker or an employer, the platform adapts to your goals.</p>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<hr class="my-5">
-
-
-<!-- Company Logos -->
-<style>
-  .logo-track {
-    display: flex;
-    width: calc(250px * 16);
-    animation: scroll 40s linear infinite;
-  }
-  @keyframes scroll {
-    0% {
-      transform: translateX(0);
-    }
-    100% {
-      transform: translateX(calc(-250px * 8));
-    }
-  }
-  .logo-slide {
-    width: 250px;
-    flex-shrink: 0;
-  }
-</style>
-<div class="container text-center my-5 overflow-hidden">
-  <h4 class="mb-4">Trusted By Top Companies</h4>
-  <br>
-  <div class="logo-track d-flex align-items-center">
-    {% for i in "12345678" %}
-      <div class="logo-slide mx-5"><img src="https://upload.wikimedia.org/wikipedia/commons/4/44/Microsoft_logo.svg" height="40" /></div>
-      <div class="logo-slide mx-5"><img src="https://upload.wikimedia.org/wikipedia/commons/f/fa/Apple_logo_black.svg" height="40" /></div>
-      <div class="logo-slide mx-5"><img src="https://www.pngplay.com/wp-content/uploads/9/Coca-Cola-Logo-PNG-Images-HD.png" height="40" /></div>
-      <div class="logo-slide mx-5"><img src="https://upload.wikimedia.org/wikipedia/commons/5/51/Facebook_f_logo_%282019%29.svg" height="40" /></div>
-      <div class="logo-slide mx-5"><img src="https://cdn.pixabay.com/photo/2021/08/10/16/02/amazon-6536326_1280.png" height="40" /></div>
-    {% endfor %}
-  </div>
-</div>
-
-<hr class="my-5">
-
-<!-- 📋 How It Works (Card-based) -->
-<div class="container my-5" data-aos="fade-up" data-aos-duration="1000">
-  <h2 class="text-center mb-4">How It Works</h2>
-  <div class="row g-4">
-    <div class="col-md-4">
-      <div class="card border-0 shadow-sm h-100 text-center">
-        <div class="card-body">
-          <i class="bi bi-person-plus-fill display-4 text-info mb-3"></i>
-          <h5 class="card-title">1. Register an Account</h5>
-          <p class="card-text">Sign up as a job seeker or employer in a few simple steps.</p>
-        </div>
-      </div>
-    </div>
-    <div class="col-md-4">
-      <div class="card border-0 shadow-sm h-100 text-center">
-        <div class="card-body">
-          <i class="bi bi-journal-code display-4 text-secondary mb-3"></i>
-          <h5 class="card-title">2. Engage with Jobs</h5>
-          <p class="card-text">Post or apply to jobs tailored to your profile and preferences.</p>
-        </div>
-      </div>
-    </div>
-    <div class="col-md-4">
-      <div class="card border-0 shadow-sm h-100 text-center">
-        <div class="card-body">
-          <i class="bi bi-check-circle-fill display-4 text-success mb-3"></i>
-          <h5 class="card-title">3. Achieve Your Goal</h5>
-          <p class="card-text">Get hired or hire the best talent to grow your business fast.</p>
-        </div>
-      </div>
-    </div>
+      <button class="btn btn-primary px-5" 
+        type="submit" 
+        style="border-radius: 5px 5px 5px 5px">
+        Find Jobs
+      </button>
+    </form>
   </div>
 </div>
 
 
-<!-- 🧑‍💼 Split Section -->
-<hr class="my-5">
-<div class="row align-items-center" data-aos="fade-right" data-aos-duration="1000">
-  <div class="col-md-6">
-    <img src="https://eatsleepworkrepeat.com/wp-content/uploads/2020/06/office.jpg" class="img-fluid rounded">
-  </div>
-  <div class="col-md-6">
-    <h3>For Employers</h3>
-    <p>Post unlimited jobs with a subscription, manage candidates, and track hiring progress with ease.</p>
-    <a href="{% url 'register' %}" class="btn btn-outline-primary">Join as Employer</a>
-  </div>
-</div>
-
-<br>
-<hr class="my-5">
-<br>
-
-<!-- 💬 Testimonials -->
-<div class="text-center mb-4" data-aos="zoom-in" data-aos-duration="1000">
-  <h2>What Users Say</h2>
-</div>
-<div class="row text-center">
-  <div class="col-md-4">
-    <blockquote class="blockquote">
-      “Found a job in 3 days! Love the simple UI.”<br><br>
-      <footer class="blockquote-footer">Adeel, Job Seeker</footer>
-    </blockquote>
-  </div>
-  <div class="col-md-4">
-    <blockquote class="blockquote">
-      “Posting jobs and managing applicants is super easy.”<br><br>
-      <footer class="blockquote-footer">Sarah, Recruiter</footer>
-    </blockquote>
-  </div>
-  <div class="col-md-4">
-    <blockquote class="blockquote">
-      “This platform helped us hire 5 developers in a week!”<br><br>
-      <footer class="blockquote-footer">Talha, HR Manager</footer>
-    </blockquote>
-  </div>
-</div>
-<br>
-<br>
-
-<!-- 📊 Animated Counters -->
-<hr class="my-5">
-<div class="container py-5 text-center" data-aos="fade-up">
-  <div class="row">
-    <div class="col-md-3">
-      <h2 class="counter" data-count="2000">0</h2>
-      <p>Jobs Posted</p>
-    </div>
-    <div class="col-md-3">
-      <h2 class="counter" data-count="1500">0</h2>
-      <p>Applications</p>
-    </div>
-    <div class="col-md-3">
-      <h2 class="counter" data-count="500">0</h2>
-      <p>Companies</p>
-    </div>
-    <div class="col-md-3">
-      <h2 class="counter" data-count="3000">0</h2>
-      <p>Users</p>
+  <!-- Main Section -->
+  <div class="container-fluid p-0 m-0">
+    <div class="row g-0">
+      <div class="col p-0">
+        <img src="{% static 'core/images/landing-page1.png' %}" 
+             alt="Job search" 
+             class="w-100 p-0 m-0">
+      </div>
     </div>
   </div>
+
+  <div class="container-fluid p-0 m-0 text-center mb-5 mt-5">
+    <h3>Welcome to Job Portal</h3>
+    <p>Create an account or sign in to see personalized job recommendations.</p>
+    <a href="{% url 'register' %}" 
+       class="btn btn-primary btn-lg px-5">
+       Get Started →
+    </a>
+    <a class="d-block mt-5" style="color:rgb(0, 0, 0); text-decoration: none;"
+       data-bs-toggle="collapse" 
+       data-bs-target="#trendingJobs" 
+       aria-expanded="false" 
+       aria-controls="trendingJobs">
+      What's trending on Job Portal ▼
+    </a>
+
+    <div class="collapse mt-4" id="trendingJobs">
+      <ul class="list-group" style="max-width: 400px; margin: auto;">
+        <li class="list-group-item"><a style="color:rgb(0, 0, 0); text-decoration: none;" href="">Software Engineer</a></li>
+        <li class="list-group-item"><a style="color:rgb(0, 0, 0); text-decoration: none;" href="">Digital Marketing</a></li>
+        <li class="list-group-item"><a style="color:rgb(0, 0, 0); text-decoration: none;" href="">Project Manager</a></li>
+        <li class="list-group-item"><a style="color:rgb(0, 0, 0); text-decoration: none;" href="">Design Jobs</a></li>
+      </ul>
+    </div>
+
+  </div>
 </div>
-
-<script>
-  const counters = document.querySelectorAll('.counter');
-  counters.forEach(counter => {
-    const update = () => {
-      const target = +counter.getAttribute('data-count');
-      const count = +counter.innerText;
-      const increment = target / 200;
-
-      if (count < target) {
-        counter.innerText = Math.ceil(count + increment);
-        setTimeout(update, 10);
-      } else {
-        counter.innerText = target;
-      }
-    };
-    update();
-  });
-</script>
 
 {% endblock %}

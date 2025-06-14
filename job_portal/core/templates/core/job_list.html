@@ -1,33 +1,168 @@
 {% extends 'base.html' %}
 {% block title %}Job Search{% endblock %}
 {% block content %}
-<div class="mb-4">
-  <form method="GET" class="d-flex">
-    <input type="text" name="q" class="form-control me-2" placeholder="Search jobs..." value="{{ query }}">
-    <button type="submit" class="btn btn-outline-primary">Search</button>
-  </form>
+<div class="container-fluid py-5" style="background:rgb(255, 255, 255)">
+ 
+<!-- Search Section -->
+  <div class="container mb-0" style="max-width: 800px;">
+    <form class="input-group p-2 border shadow-lg bg-light rounded align-items-center" style="border-radius: 50px">
+      <span class="input-group-text bg-transparent border-0 ps-4"><i class="bi bi-briefcase-fill text-muted"></i></span>
+      <input 
+        type="text" 
+        name="search" 
+        class="form-control border-0 bg-transparent p-2" 
+        placeholder='Job title, keywords, or company'
+        aria-label='Job title, keywords, or company'
+      >
+
+      <span class="input-group-text bg-transparent border-0"><i class="bi bi-geo-alt-fill text-muted"></i></span>
+      <input 
+        type="text" 
+        name="location" 
+        class="form-control border-0 bg-transparent p-2" 
+        placeholder='City, state, or &quot;remote&quot;' 
+        aria-label='Location'
+      >
+
+      <button class="btn btn-primary px-5" 
+        type="submit" 
+        style="border-radius: 5px 5px 5px 5px">
+        Find Jobs
+      </button>
+    </form>
+  </div>
 </div>
 
-<div class="card p-4 shadow">
-  <h4>Job Listings</h4>
-  <ul class="list-group mt-3">
-    {% for job in jobs %}
-      <li class="list-group-item">
-        <strong><a href="{% url 'job-detail' job.id %}">{{ job.title }}</a></strong> - {{ job.location }}<br>
-          {% if job.id in applied_ids %}
-            <span class="badge bg-secondary">Already Applied</span>
-          {% else %}
-            <a href="{% url 'apply-job' job.id %}" class="btn btn-sm btn-success mt-2">Apply</a>
-        {% endif %}
-        {% if job.id in saved_job_ids %}
-  <a href="{% url 'unsave-job' job.id %}" class="btn btn-sm btn-outline-danger mt-2">Unsave</a>
-{% else %}
-  <a href="{% url 'save-job' job.id %}" class="btn btn-sm btn-outline-secondary mt-2">Save</a>
-{% endif %}
-      </li>
-    {% empty %}
-      <li class="list-group-item">No jobs found.</li>
-    {% endfor %}
-  </ul>
+
+
+<div class="container p-4">
+  {% if not jobs %}
+          <div class="alert alert-warning mt-4">
+            No Jobs Found.
+          </div>
+  {% else %}
+
+  <div class="row g-4">
+    <!-- Left side: Job List -->
+    <div class="col-md-4">
+      <div class="list-group">
+        {% for job in jobs %}
+          <a 
+            href="?job={{ job.id }}"
+            class="list-group-item list-group-item-action p-3 mb-2 shadow-sm" 
+            style="border-radius: 10px; transition: transform 0.2s ease, box-shadow 0.2s ease; border: {% if request.GET.job|add:'0' == job.id %} 2px solid #007bff {% else %} 1px solid black {% endif %}; background: #ffffff;"
+            onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 6px 20px -5px rgb(0 0 0 / 0.5)'"
+            onmouseout="this.style.transform='none';this.style.boxShadow=''" 
+          >
+            <div class="d-flex justify-content-between align-items-start">
+              <div>
+                <h5>{{ job.title }}
+                  {% if job.is_urgent %}
+                    <span class="badge bg-danger ms-2">Urgent</span>
+                  {% endif %}
+                  {% if job.created_at|timesince > '7 days' %}
+                    <span class="badge bg-warning text-dark ms-2">New</span>
+                  {% endif %}
+                  {% if job.id in applied_ids %}
+                    <span class="badge bg-secondary ms-2"><i class="bi bi-check-circle-fill me-1"></i> Applied</span>
+                  {% endif %}
+                </h5>
+                <p>{{ job.employer.company_name }}</p>
+                <span>{{ job.location }}</span>
+               <div>
+                <span class="badge bg-info">
+                  {% if job.job_type == 'full' %}Full-time{% elif job.job_type == 'remote' %}Remote{% endif %}
+                </span>
+                <span class="badge bg-secondary">{{ job.salary_min|floatformat:0 }} - {{ job.salary_max|floatformat:0 }} PKR</span>
+              </div>
+                <small>Posted {{ job.created_at|timesince }} ago</small>
+              </div>
+
+              
+            </div>
+          </a>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Right side: Job Detail -->
+    <div class="col-md-8">
+      {% if request.GET.job %}
+        {% for job in jobs %}
+          {% if job.id == request.GET.job|add:'0' %}
+            <div class="card p-4 shadow position-relative">
+              <div class="position-absolute top-0 end-0 p-3 d-flex align-items-center gap-2">
+                {% if job.id in saved_job_ids %}
+                  <a href="{% url 'unsave-job' job.id %}?search={{ request.GET.search|urlencode }}&location={{ request.GET.location|urlencode }}&job={{ job.id }}" title="Unsave"><i class="bi bi-bookmark-fill fs-4 text-warning"></i></a>
+                {% else %}
+                  <a href="{% url 'save-job' job.id %}?search={{ request.GET.search|urlencode }}&location={{ request.GET.location|urlencode }}&job={{ job.id }}" title="Save"><i class="bi bi-bookmark fs-4 text-muted"></i></a>
+                {% endif %}
+                
+                <a href="#" data-bs-toggle="modal" data-bs-target="#reportJob{{ job.id }}" title="Report Job">
+                  <i class="bi bi-flag-fill fs-4 text-danger"></i>
+                </a>
+
+<!-- Report Modal -->
+<div class="modal fade" id="reportJob{{ job.id }}" tabindex="-1" aria-labelledby="reportJob{{ job.id }}" aria-hidden="true">
+  <div class="modal-dialog modal-md">
+    <div class="modal-content p-4">
+      <div class="modal-header">
+        <h5 class="modal-title" id="reportJob{{ job.id }}">Report Job</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form action="{% url 'report-job' job.id %}" method="POST">
+          {% csrf_token %}
+          <div class="mb-3">
+            <label for="report-reason-{{ job.id }}">Reason</label>
+            <input name="reason" id="report-reason-{{ job.id }}" class="form-control" required>
+          </div>
+          <button type="submit" class="btn btn-primary">Submit Report</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+              </div>
+
+              <h3>{{ job.title }}</h3>
+              <p>{{ job.company.name }}</p>
+              <span>{{ job.location }}</span>
+
+              <div class="mb-3">
+                <span class="badge bg-info">
+                  {% if job.job_type == 'full' %}Full-time{% elif job.job_type == 'remote' %}Remote{% endif %}
+                </span>
+                <span class="badge bg-secondary">{{ job.salary_min|floatformat:0 }} - {{ job.salary_max|floatformat:0 }} PKR</span>
+              </div>
+
+              <hr>
+
+              <h5 style="font-weight: bold;">Job summary</h5>
+              {{ job.description|linebreaks }}
+
+              {% if job.id in applied_ids %}
+                <span class="badge bg-secondary p-3 mt-3">
+                  <i class="bi bi-check-circle-fill me-1"></i> Already Applied
+                </span>
+              {% else %}
+                <a 
+                  href="{% url 'apply-job' job.id %}" 
+                  class="btn btn-primary mt-3">
+                  Apply now
+                </a>
+              {% endif %}
+            </div>
+          {% endif %}
+        {% endfor %}
+      {% else %}
+        <div class="card p-4 shadow">
+          <p>Select a job from the left to view details</p>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+ {% endif %}
 </div>
 {% endblock %}

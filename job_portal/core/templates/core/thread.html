@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% block title %}Chat{% endblock %}
+{% block content %}
+
+<div class="container mt-4">
+<h4 class="mb-4"><i class="bi bi-chat-fill me-1"></i> Chat with {{ recipient.username }}</h4>
+
+<div class="mb-4" style="display: flex; flex-direction: column;">
+  {% for message in messages %}
+    <div class="p-3 mb-2 shadow-sm" 
+         style="border-radius: 20px; 
+                 background: {% if message.sender == request.user %} #edf5ff {% else %} #f5f5f5 {% endif %};
+
+                 align-self: {% if message.sender == request.user %} flex-end {% else %} flex-start {% endif %};
+
+                 max-width: 60%;
+                 margin-bottom: 10px">
+      <p class="mb-0">{{ message.content }}</p>
+      <small>{{ message.timestamp|date:'M d, H:i' }}</small>
+    </div>
+  {% empty %}
+    <div class="p-3 shadow-sm text-muted" style="border-radius: 20px">
+      No messages yet. Say hi first! 👋
+    </div>
+  {% endfor %}
+</div>
+
+<div class="card p-4" style="border-radius: 20px">
+  <form method="POST" class="d-flex align-items-center">
+    {% csrf_token %}
+    <input name="content" 
+          id="message" 
+          class="form-control me-2 p-3" 
+          style="border-radius: 10px: 0 0 5px #0003;" 
+          placeholder="Type a message…" 
+          required>
+    <button type="submit" class="btn btn-primary p-2" style="border-radius: 30px">
+      <i class="bi bi-send-fill me-1"></i> Send
+    </button>
+  </form>
+</div>
+
+</div>
+{% endblock %}

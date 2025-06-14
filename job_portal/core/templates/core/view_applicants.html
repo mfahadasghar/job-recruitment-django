@@ -22,6 +22,11 @@
           </form>
           <br>
         <a href="{{ app.resume.url }}" target="_blank" class="btn btn-sm btn-outline-primary">View Resume</a>
+        <a 
+          href="{% url 'thread' app.seeker.user.id %}" 
+          class="btn btn-outline-primary">
+          <i class="bi bi-chat-fill me-1"></i>Message Applicant
+        </a>
         {% if app.cover_letter %}
           <p class="mt-2"><strong>Cover Letter:</strong> {{ app.cover_letter|truncatewords:40 }}</p>
         {% endif %}

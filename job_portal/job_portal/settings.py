@@ -32,6 +32,7 @@ LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = 'login'
 
 AUTH_USER_MODEL = 'core.User'
+STATICFILES_DIRS = [BASE_DIR / "static"]
 
 # Application definition
 

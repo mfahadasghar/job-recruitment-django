@@ -50,7 +50,7 @@
           <a 
             href="?job={{ job.id }}{% if search %}&search={{ search|urlencode }}{% endif %}{% if location %}&location={{ location|urlencode }}{% endif %}{% if page_obj.number %}&page={{ page_obj.number }}{% endif %}"
             class="list-group-item list-group-item-action p-3 mb-2 shadow-sm" 
-            style="border-radius: 10px; transition: transform 0.2s ease, box-shadow 0.2s ease; border: {% if request.GET.job|add:'0' == job.id %} 2px solid rgb(0, 145, 255) {% else %} 1px solid grey {% endif %}; background: #ffffff;"
+            style="border-radius: 8px; transition: transform 0.2s ease, box-shadow 0.2s ease; border: {% if request.GET.job|add:'0' == job.id %} 2px solid rgb(0, 145, 255) {% else %} 1px solid grey {% endif %}; background: #ffffff;"
             onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 6px 20px -5px rgb(0 0 0 / 0.5)'"
             onmouseout="this.style.transform='none';this.style.boxShadow=''" 
           >
@@ -58,22 +58,22 @@
               <div>
                 <h5>{{ job.title }}
                   {% if job.is_urgent %}
-                    <span class="badge bg-danger ms-2">Urgent</span>
+                    <span class="badge bg-danger ms-1">Urgent</span>
                   {% endif %}
                   {% if job.created_at|timesince < '7 days' %}
-                    <span class="badge bg-warning text-dark ms-2">New</span>
+                    <span class="badge bg-warning text-dark ms-1">New</span>
                   {% endif %}
                   {% if job.id in applied_ids %}
-                    <span class="badge bg-secondary ms-2"><i class="bi bi-check-circle-fill me-1"></i> Applied</span>
+                    <span class="badge bg-secondary ms-1"><i class="bi bi-check-circle-fill me-1"></i> Applied</span>
                   {% endif %}
                 </h5>
-                <p>{{ job.employer.company_name }}</p>
-                <span>{{ job.location }}</span>
-               <div>
-                <span class="badge bg-info">
+                <span style="font-weight:600">{{ job.employer.company_name }}</span><br>
+                <small>{{ job.location }}</small>
+               <div class="mt-2">
+                <span class="badge bg-info p-2">
                   {% if job.job_type == 'full' %}Full-time{% elif job.job_type == 'remote' %}Remote{% endif %}
                 </span>
-                <span class="badge bg-secondary">{{ job.salary_min|floatformat:0 }} - {{ job.salary_max|floatformat:0 }} PKR</span>
+                <span class="badge bg-secondary p-2">{{ job.salary_min|floatformat:0 }} - {{ job.salary_max|floatformat:0 }} PKR</span>
               </div>
                 <small>Posted {{ job.created_at|timesince }} ago</small>
               </div>
@@ -121,7 +121,7 @@
       {% if request.GET.job %}
         {% for job in page_obj %}
           {% if job.id == request.GET.job|add:'0' %}
-            <div class="card p-4 position-relative">
+            <div class="card p-4 position-relative" style="border: 1px solid grey">
               <div class="position-absolute top-0 end-0 p-3 d-flex align-items-center gap-2">
                 {% if job.id in saved_job_ids %}
                   <a href="{% url 'unsave-job' job.id %}?search={{ search|urlencode }}&location={{ location|urlencode }}&job={{ job.id }}&page={{ page_obj.number }}"  title="Unsave"><i class="bi bi-bookmark-fill fs-4 text-warning"></i></a>
@@ -212,7 +212,7 @@
           {% endif %}
         {% endfor %}
       {% else %}
-        <div class="card p-4">
+        <div class="card p-4" style="border: 1px solid grey">
           <p>Select a job from the left to view details</p>
         </div>
       {% endif %}

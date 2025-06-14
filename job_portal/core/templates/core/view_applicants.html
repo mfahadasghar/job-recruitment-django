@@ -42,13 +42,13 @@
           {% for app in applications %}
             <a 
               href="?selected={{ app.id }}"
-              class="list-group-item p-3 d-flex align-items-center {% if request.GET.selected|add:'0' == app.id %}active{% endif %} shadow-sm mb-2"
-              style="border-radius: 10px">
+              class="list-group-item p-3 d-flex align-items-center {% if request.GET.selected|add:'0' == app.id %}active{% endif %} mb-2"
+              style="border-radius: 10px; border: 1px solid grey">
                <div class="flex-grow-1">
                  <h6>{{ app.seeker.user.username|capfirst }}</h6>
                  <small>Applied on: {{ app.applied_at|date:"M d, Y H:i" }}</small>
                </div>
-               <span class="badge 
+               <span class="badge p-2
                  {% if app.status == 'applied' %}bg-warning{% endif %}
                  {% if app.status == 'interview' %}bg-info{% endif %}
                  {% if app.status == 'rejected' %}bg-danger{% endif %}

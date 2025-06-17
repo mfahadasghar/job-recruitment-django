@@ -46,8 +46,7 @@ class CustomLoginView(LoginView):
         elif self.request.user.role == 'employer':
             from django.urls import reverse
             return reverse('employer-dashboard')
-        from django.urls import reverse
-        return reverse('dashboard')
+        return redirect('/admin')
     
 class CustomLogoutView(LogoutView):
     def dispatch(self, request, *args, **kwargs):
@@ -119,12 +118,12 @@ def post_job(request):
     # Check job posting limit
     if not subscription and job_count >= 1:
         messages.error(request, "You can only post 1 job for free. Purchase a subscription to post more.")
-        return redirect('my-jobs')
+        return redirect('subscription-plans')
 
     if subscription and subscription.plan.max_jobs is not None:
         if job_count >= subscription.plan.max_jobs:
             messages.error(request, "Job posting limit reached for your plan.")
-            return redirect('my-jobs')
+            return redirect('subscription-plans')
 
     if request.method == 'POST':
         form = JobForm(request.POST)
@@ -626,7 +625,7 @@ def inbox(request):
         'conversations': conversations,
         'thread_recipient': thread_recipient,
         'thread_recipient_id': thread_recipient_id,
-        'messages': messages,
+        'inbox_messages': messages,
     }
     return render(request, 'core/inbox.html', context)
 

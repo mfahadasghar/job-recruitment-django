@@ -131,7 +131,7 @@
   {% include 'core/header.html' %}
 
   <main class="flex-grow-1">
-    {% comment %} <div id="messages" class="fixed-top p-4">
+     <div id="messages" class="fixed-top p-4">
       {% if messages %}
         {% for message in messages %}
           <div class="alert alert-{{ message.tags }} shadow mb-2" role="alert">
@@ -139,7 +139,7 @@
           </div>
         {% endfor %}
       {% endif %}
-    </div> {% endcomment %}
+    </div>
 
     
     {% block landing_content %}{% endblock %}

@@ -46,7 +46,8 @@ class CustomLoginView(LoginView):
         elif self.request.user.role == 'employer':
             from django.urls import reverse
             return reverse('employer-dashboard')
-        return redirect('/admin')
+        from django.urls import reverse
+        return reverse('dashboard')
     
 class CustomLogoutView(LogoutView):
     def dispatch(self, request, *args, **kwargs):
@@ -549,6 +550,8 @@ def landing_page(request):
             return redirect('job-list')
         elif request.user.role == 'employer':
             return redirect('employer-dashboard')
+        else:
+            return redirect('/admin/')
     else:
         return render(request, 'core/landing.html')
     

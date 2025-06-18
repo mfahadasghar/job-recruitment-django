@@ -677,3 +677,4 @@ def schedule_interview(request, application_id):
     return render(request, 'core/schedule_interview.html', {
         'application': application
     })
+    
